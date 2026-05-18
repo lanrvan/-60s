@@ -23,22 +23,18 @@
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg-color); color: var(--text-main); -webkit-tap-highlight-color: transparent; }
         
-        /* 页面视图切换控制 */
         .page-view { display: none; min-height: 100vh; box-sizing: border-box; }
         .page-view.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 主页容器 */
         #main-page { padding: calc(var(--safe-top) + 15px) 15px calc(var(--safe-bottom) + 30px) 15px; max-width: 600px; margin: 0 auto; }
         
-        /* 二级页面 */
         #detail-page { background: var(--bg-color); position: fixed; top:0; left:0; width: 100%; height: 100%; overflow-y: auto; z-index: 100; }
         .nav-bar { background: var(--card-bg); padding: calc(var(--safe-top) + 10px) 15px 10px 15px; display: flex; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 101; }
         .back-btn { color: var(--primary); font-size: 16px; font-weight: 500; cursor: pointer; border: none; background: none; padding: 5px 10px 5px 0; display: flex; align-items: center; }
-        .nav-title { flex: 1; text-align: center; font-size: 17px; font-weight: 600; margin-right: 40px; } /* offset back btn */
+        .nav-title { flex: 1; text-align: center; font-size: 17px; font-weight: 600; margin-right: 40px; } 
         .detail-content { padding: 15px; max-width: 600px; margin: 0 auto; padding-bottom: calc(var(--safe-bottom) + 30px); }
 
-        /* 卡片化排版 */
         .card { background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; overflow: hidden; }
         .card-header { background: #fafafc; padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .card-header h2 { margin: 0; font-size: 17px; color: var(--primary); }
@@ -49,37 +45,35 @@
         
         .card-content { padding: 16px; }
         
-        /* 二级标题 */
         .sub-header { font-size: 15px; font-weight: 600; color: var(--text-main); margin: 16px 0 10px 0; padding-left: 8px; border-left: 3px solid var(--danger); }
         .sub-header:first-child { margin-top: 0; }
         
-        /* 列表容器 */
         .data-list { display: flex; flex-direction: column; gap: 12px; }
         
-        /* 图文混排媒体对象 (核心改动) */
+        /* 图文混排样式 */
         .media-item { display: flex; gap: 12px; text-decoration: none; color: inherit; padding-bottom: 12px; border-bottom: 1px solid var(--border); align-items: flex-start; }
         .media-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .media-item:active { opacity: 0.7; } /* 点击反馈 */
+        .media-item:active { opacity: 0.7; }
         
         .media-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+        
+        /* 修复截断：图文列表截断2行，全文本不截断 */
         .media-title { font-size: 15px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .full-text { font-size: 15px; line-height: 1.6; word-wrap: break-word; white-space: normal; } 
+        
         .media-tags { display: flex; flex-wrap: wrap; gap: 6px; }
         .tag { font-size: 11px; color: var(--text-muted); background: #f0f0f5; padding: 2px 6px; border-radius: 4px; }
-        
         .media-thumb { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #f0f0f5; }
         
-        /* 特殊板块样式 */
         .weiyu { margin-top: 15px; padding: 12px; background: var(--bg-color); border-radius: 8px; font-size: 14px; color: #555; }
         .image-box img { width: 100%; border-radius: 8px; display: block; }
         .text-block { font-size: 15px; font-style: italic; color: #444; line-height: 1.6; padding: 10px; text-align: center; }
         
-        /* 键值对网格 (汇率等) */
         .kv-list { display: flex; flex-wrap: wrap; gap: 10px; }
         .kv-list .kv-item { width: calc(50% - 5px); background: #f8f8f8; padding: 10px; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         .kv-key { color: var(--text-muted); display: block; margin-bottom: 4px; font-size: 12px; }
         .kv-val { font-weight: 600; color: var(--text-main); }
         
-        /* 状态提示 */
         .loading-state { text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px; }
         .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(0,122,255,0.2); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s ease-in-out infinite; margin-bottom: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -87,26 +81,19 @@
 </head>
 <body>
 
-    <!-- 第一层：主页 -->
-    <div id="main-page" class="page-view active">
-        <!-- 卡片骨架将由 JS 动态生成 -->
-    </div>
+    <div id="main-page" class="page-view active"></div>
 
-    <!-- 第二层：热点资讯完整页 (全屏遮罩) -->
     <div id="detail-page" class="page-view">
         <div class="nav-bar">
             <button class="back-btn" onclick="toggleDetail(false)">❮ 返回</button>
             <div class="nav-title">热点资讯排行榜</div>
         </div>
         <div class="detail-content card">
-            <div class="card-content" id="detail-container">
-                <!-- 完整列表动态渲染 -->
-            </div>
+            <div class="card-content" id="detail-container"></div>
         </div>
     </div>
 
     <script>
-        // --- 1. 核心配置与排序 ---
         const configs = [
             { id: 's60s', title: '每天60秒读懂世界', endpoints: ['60s'], type: 'text-only' },
             { id: 'ai', title: 'AI资讯快报', endpoints: ['ai', 'ainews'] },
@@ -128,60 +115,49 @@
         ];
 
         const API_BASES = ['https://60s.viki.moe/v2/', 'https://60s-api.viki.moe/v2/'];
-        
-        // 全局缓存字典，用于“热点资讯”二级页面秒开，不用重新请求
         const globalDataCache = {}; 
 
-        // --- 2. 底层网络引擎 ---
+        // 【修复 1】独立的作用域控制：为每一次 fetch 分配专属的 Timeout
         async function fetchWithFallbacks(endpoints) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 6000); // 独立超时控制，防某接口卡死
-
             for (const base of API_BASES) {
                 for (const ep of endpoints) {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 6000); 
+                    
                     try {
                         const res = await fetch(`${base}${ep}`, { signal: controller.signal });
+                        clearTimeout(timeoutId);
                         if (res.ok) {
-                            const json = await res.json();
-                            clearTimeout(timeoutId);
-                            if (json.code === 200 || json.status === 200) {
-                                return json.data !== undefined ? json.data : json;
-                            }
-                            return json; 
+                            return await res.json(); // 返回原始 JSON，交由下一步统一解包
                         }
-                    } catch (e) { /* 静默失败，试下一个 */ }
+                    } catch (e) { 
+                        clearTimeout(timeoutId); 
+                        // 静默失败，继续尝试数组中的下一个备用接口
+                    }
                 }
             }
-            clearTimeout(timeoutId);
-            throw new Error("All endpoints failed");
+            throw new Error("所有接口备用节点均无法访问");
         }
 
-        // --- 3. 页面骨架初始化 ---
         function initSkeleton() {
             const mainPage = document.getElementById('main-page');
             let html = '';
 
             configs.forEach(c => {
                 const isGroup = c.type === 'group';
-                // 卡片头部
                 let headerActions = `<div class="actions">`;
                 if (isGroup) {
                     headerActions += `<button class="btn-view-all" onclick="toggleDetail(true)">查看完整 ➔</button>`;
                 } else {
-                    // 非分组卡片，给自己的刷新按钮
                     headerActions += `<div class="btn-refresh" title="重新加载" onclick="triggerFetch('${c.id}')">🔄</div>`;
                 }
                 headerActions += `</div>`;
 
                 html += `<div class="card" id="card-${c.id}">
-                            <div class="card-header">
-                                <h2>${c.title}</h2>
-                                ${headerActions}
-                            </div>
+                            <div class="card-header"><h2>${c.title}</h2>${headerActions}</div>
                             <div class="card-content" id="content-${c.id}">`;
 
                 if (isGroup) {
-                    // 分组骨架
                     c.children.forEach(child => {
                         html += `
                             <div class="sub-header">
@@ -192,7 +168,6 @@
                         `;
                     });
                 } else {
-                    // 独立板块骨架
                     html += `<div class="loading-state"><div class="spinner"></div><br>数据抓取中...</div>`;
                 }
                 
@@ -201,38 +176,45 @@
             mainPage.innerHTML = html;
         }
 
-        // --- 4. 智能渲染引擎 (将 JSON 转为 DOM 字符串) ---
         function generateHTML(data, config, isDetailMode = false) {
-            if (!data) return '<div class="loading-state" style="color:var(--danger)">❌ 暂无数据或获取失败</div>';
+            if (!data) return '<div class="loading-state" style="color:var(--danger)">❌ 暂无数据或解析失败</div>';
 
-            // A. 纯文本模式 (60s) - 严格去图，不加跳转
+            // 智能剥离外层包裹 (适配 {code:200, data: [...]} 或 {result: [...]} 等格式)
+            let coreData = data;
+            if (typeof data === 'object' && !Array.isArray(data)) {
+                if (data.data) coreData = data.data;
+                else if (data.result) coreData = data.result;
+                else if (data.list) coreData = data.list;
+                else if (data.news) coreData = data.news;
+                else if (data.item) coreData = data.item;
+            }
+
+            // A. 纯文本模式 (专门适配 60s)
             if (config.type === 'text-only') {
-                let news = Array.isArray(data.news) ? data.news : (Array.isArray(data) ? data : []);
-                let weiyu = data.weiyu || data.tip || '';
+                let news = Array.isArray(coreData) ? coreData : (Array.isArray(data.news) ? data.news : []);
+                let weiyu = data.weiyu || data.tip || (coreData && coreData.weiyu) || '';
                 let html = '<div class="data-list">';
                 news.forEach(item => {
                     let text = typeof item === 'object' ? (item.title || item.content || JSON.stringify(item)) : item;
-                    html += `<div class="media-item"><div class="media-content"><div class="media-title">${text}</div></div></div>`;
+                    // 【修复 2】这里使用 full-text 样式，去除行数截断限制
+                    html += `<div class="media-item"><div class="media-content"><div class="full-text">${text}</div></div></div>`;
                 });
                 html += '</div>';
                 if (weiyu) html += `<div class="weiyu"><strong>微语：</strong>${weiyu}</div>`;
                 return html;
             }
 
-            let coreData = data.data || data.list || data.news || data;
-
             // B. 单图模式 (摸鱼日报)
-            if (config.type === 'image-prefer' || (typeof coreData === 'object' && !Array.isArray(coreData) && (coreData.image || coreData.url))) {
+            if (config.type === 'image-prefer' || (typeof coreData === 'object' && !Array.isArray(coreData) && (coreData.image || coreData.url || coreData.img))) {
                 let src = coreData.image || coreData.img || coreData.url || coreData;
                 if (typeof src === 'string' && (src.startsWith('http') || src.startsWith('//'))) {
-                    return `<div class="image-box"><img src="${src}"></div>`;
+                    return `<div class="image-box"><img src="${src}" alt="资讯图片"></div>`;
                 }
             }
 
-            // C. 列表图文混排模式 (支持跳转链接与右侧缩略图)
+            // C. 列表图文混排模式 (支持跳转和缩略图)
             if (Array.isArray(coreData)) {
                 let list = coreData;
-                // 如果是主页且配置了 limit，则截断；如果是详情页，则显示全部
                 if (!isDetailMode && config.limit) list = list.slice(0, config.limit); 
                 if (list.length === 0) return '<div class="loading-state">暂无内容</div>';
                 
@@ -243,19 +225,16 @@
                         return;
                     }
 
-                    // 提取核心字段
                     let title = item.title || item.name || item.keyword || item.word || item.desc || item.event || JSON.stringify(item);
                     let url = item.url || item.link || item.href || item.mobileUrl;
                     let img = item.image || item.img || item.pic || item.cover || item.thumb;
                     
-                    // 提取标签 (热度、年份、价格等)
                     let tagsHtml = '';
                     if (item.hot) tagsHtml += `<span class="tag">🔥 ${item.hot}</span>`;
                     if (item.year) tagsHtml += `<span class="tag">📅 ${item.year}年</span>`;
                     if (item.price) tagsHtml += `<span class="tag">💰 ${item.price}</span>`;
                     if (item.end_date) tagsHtml += `<span class="tag">截止: ${item.end_date}</span>`;
 
-                    // 构建 DOM
                     let contentStr = `
                         <div class="media-content">
                             <div class="media-title">${title}</div>
@@ -264,7 +243,6 @@
                         ${img ? `<img src="${img}" class="media-thumb">` : ''}
                     `;
 
-                    // 根据是否有 URL 决定是否包裹 <a> 标签
                     if (url) {
                         html += `<a href="${url}" target="_blank" class="media-item">${contentStr}</a>`;
                     } else {
@@ -275,16 +253,11 @@
                 return html;
             }
 
-            // D. 单句文本模式 (一言)
-            let textStr = coreData.word || coreData.hitokoto || coreData.text || coreData.yiyan;
-            if (typeof coreData === 'string') textStr = coreData;
-            if (textStr && typeof textStr === 'string') return `<div class="text-block">“ ${textStr} ”</div>`;
-
-            // E. 网格键值对模式 (汇率、金价、油价)
-            if (config.type === 'kv' || (typeof coreData === 'object' && coreData !== null)) {
+            // D. 网格键值对模式 (汇率、金价、油价)
+            if (config.type === 'kv' || (typeof coreData === 'object' && coreData !== null && !Array.isArray(coreData))) {
                 let html = '<div class="kv-list">';
                 for (let key in coreData) {
-                    if (['code', 'status', 'msg', 'message', 'time', 'update_time'].includes(key)) continue;
+                    if (['code', 'status', 'msg', 'message', 'time', 'update_time', 'success'].includes(key)) continue;
                     let val = coreData[key];
                     let finalVal = '-';
                     if (typeof val === 'string' || typeof val === 'number') { finalVal = val; } 
@@ -292,50 +265,44 @@
                     html += `<div class="kv-item"><span class="kv-key">${key}</span><span class="kv-val">${finalVal}</span></div>`;
                 }
                 html += '</div>';
+                if (html === '<div class="kv-list"></div>') return '<div class="loading-state">数据结构不匹配</div>';
                 return html;
             }
 
-            return '<div class="loading-state">数据解析未匹配</div>';
+            // E. 单句文本模式 (一言)
+            let textStr = coreData.word || coreData.hitokoto || coreData.text || coreData.yiyan;
+            if (typeof coreData === 'string') textStr = coreData;
+            if (textStr && typeof textStr === 'string') return `<div class="text-block">“ ${textStr} ”</div>`;
+
+            return '<div class="loading-state">未知的数据格式</div>';
         }
 
-        // --- 5. 调度中心 ---
-
-        // 触发某个具体模块的获取
         async function triggerFetch(targetId, isChild = false) {
-            // 找到对应的配置
-            let conf = null;
-            if (isChild) {
-                const group = configs.find(c => c.type === 'group');
-                conf = group.children.find(c => c.id === targetId);
-            } else {
-                conf = configs.find(c => c.id === targetId);
-            }
+            let conf = isChild 
+                ? configs.find(c => c.type === 'group').children.find(c => c.id === targetId)
+                : configs.find(c => c.id === targetId);
 
             const container = document.getElementById(`content-${conf.id}`);
             container.innerHTML = `<div class="loading-state"><div class="spinner"></div></div>`;
 
             try {
                 const data = await fetchWithFallbacks(conf.endpoints);
-                globalDataCache[conf.id] = data; // 存入内存，供二级页面使用
+                globalDataCache[conf.id] = data; 
                 container.innerHTML = generateHTML(data, conf, false);
             } catch (error) {
-                container.innerHTML = `<div class="loading-state" style="color:var(--danger)">❌ 网络超时或接口异常</div>`;
+                container.innerHTML = `<div class="loading-state" style="color:var(--danger)">❌ 网络异常或接口不可用</div>`;
+                console.error(`[${conf.title}] API请求失败:`, error);
             }
         }
 
-        // 启动主流程：遍历配置，触发所有请求
         function bootup() {
             initSkeleton();
             configs.forEach(c => {
-                if (c.type === 'group') {
-                    c.children.forEach(child => triggerFetch(child.id, true));
-                } else {
-                    triggerFetch(c.id, false);
-                }
+                if (c.type === 'group') c.children.forEach(child => triggerFetch(child.id, true));
+                else triggerFetch(c.id, false);
             });
         }
 
-        // 二级路由切换逻辑 (热点资讯全量呈现)
         function toggleDetail(show) {
             const mainPage = document.getElementById('main-page');
             const detailPage = document.getElementById('detail-page');
@@ -346,7 +313,6 @@
                 detailPage.classList.add('active');
                 window.scrollTo(0, 0);
 
-                // 根据内存缓存，无限制(limit)重新渲染热搜数据
                 let html = '';
                 const hotGroup = configs.find(c => c.id === 'hot');
                 hotGroup.children.forEach(child => {
@@ -360,7 +326,6 @@
             }
         }
 
-        // 开始执行
         bootup();
     </script>
 </body>
