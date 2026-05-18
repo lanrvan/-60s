@@ -28,45 +28,84 @@
         <div class="loading">正在加载今日数据...</div>
     </div>
 
-    <script>
-        async function fetchData() {
-            try {
-                // 调用默认 JSON 接口
-                const response = await fetch('https://60s-api.viki.moe');
-                const res = await response.json();
+   <script>
+    async function fetchData() {
+        // 1. 准备多个官方公共节点，防止单点域名在国内被墙或失效
+        const urls = [
+            'https://60s.viki.moe/v2/60s',
+            'https://60s-api.viki.moe/v2/60s'
+        ];
 
-                if (res.status === 200) {
-                    renderUI(res.data);
-                } else {
-                    document.getElementById('app').innerHTML = '<div class="loading">数据获取失败</div>';
+        let response, res, success = false;
+
+        // 2. 轮询请求，只要有一个域名成功就使用
+        for (const url of urls) {
+            try {
+                response = await fetch(url);
+                if (response.ok) {
+                    res = await response.json();
+                    success = true;
+                    break; 
                 }
-            } catch (error) {
-                document.getElementById('app').innerHTML = '<div class="loading">网络连接异常</div>';
+            } catch (e) {
+                console.error(`节点 ${url} 访问失败，正在尝试备用节点...`, e);
             }
         }
 
-        function renderUI(data) {
-            // 生成新闻列表
-            const newsItems = data.news.map(item => `<li>${item}</li>`).join('');
-            
-            // 渲染 DOM
-            document.getElementById('app').innerHTML = `
-                <div class="image-box">
-                    <img src="${data.image}" alt="今日60秒图片">
-                </div>
-                <div class="content">
-                    <h2>文本信息源</h2>
-                    <ul class="news-list">
-                        ${newsItems}
-                    </ul>
-                    <div class="weiyu">
-                        <strong>微语：</strong>${data.weiyu}
-                    </div>
-                </div>
-            `;
+        // 3. 网络彻底断开或所有节点失效的处理
+        if (!success) {
+            document.getElementById('app').innerHTML = '<div class="loading">❌ 网络连接异常或接口服务暂不可用</div>';
+            return;
         }
 
-        fetchData();
-    </script>
+        // 4. 【核心修复】自动兼容扁平结构与包裹结构
+        let finalData = null;
+        if (res.code === 200 && res.data) {
+            finalData = res.data; // 适配带 code/data 结构的 API
+        } else if (res.news) {
+            finalData = res;      // 适配直接返回内容的扁平 API
+        }
+
+        // 5. 执行渲染或报错
+        if (finalData) {
+            renderUI(finalData);
+        } else {
+            document.getElementById('app').innerHTML = `<div class="loading">❌ 数据解析失败，接口返回状态码: ${res.code || '未知'}</div>`;
+        }
+    }
+
+    function renderUI(data) {
+        // 6. 兼容处理：判断 news 数组里是纯文本字符串，还是包含 title 的对象
+        const newsItems = data.news.map(item => {
+            if (typeof item === 'object' && item !== null) {
+                return `<li>${item.title || item.content || JSON.stringify(item)}</li>`;
+            }
+            return `<li>${item}</li>`;
+        }).join('');
+        
+        // 7. 兼容处理微语字段名（部分历史版本为 tip，新版为 weiyu）
+        const weiyuText = data.weiyu || data.tip || '暂无微语';
+        const imageSrc = data.image || '';
+
+        // 8. 动态生成 DOM 树
+        document.getElementById('app').innerHTML = `
+            <div class="image-box">
+                ${imageSrc ? `<img src="${imageSrc}" alt="今日60秒图片">` : ''}
+            </div>
+            <div class="content">
+                <h2>信息源列表</h2>
+                <ul class="news-list">
+                    ${newsItems}
+                </ul>
+                <div class="weiyu">
+                    <strong>微语：</strong>${weiyuText}
+                </div>
+            </div>
+        `;
+    }
+
+    // 启动执行
+    fetchData();
+</script>
 </body>
 </html>
