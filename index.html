@@ -11,13 +11,13 @@
     <title>全网热点资讯</title>
     <style>
         :root {
-            --bg-color: #f2f2f7;
+            --bg-color: #f1f5f9;
             --card-bg: #ffffff;
-            --text-main: #1c1c1e;
-            --text-muted: #8e8e93;
-            --primary: #007aff;
-            --danger: #ff3b30;
-            --border: #e5e5ea;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --border: #e2e8f0;
             --safe-top: env(safe-area-inset-top, 20px);
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
@@ -29,51 +29,54 @@
 
         #main-page { padding: calc(var(--safe-top) + 15px) 15px calc(var(--safe-bottom) + 30px) 15px; max-width: 600px; margin: 0 auto; }
         
+        /* 导航与二级页面 */
         #detail-page { background: var(--bg-color); position: fixed; top:0; left:0; width: 100%; height: 100%; overflow-y: auto; z-index: 100; }
         .nav-bar { background: var(--card-bg); padding: calc(var(--safe-top) + 10px) 15px 10px 15px; display: flex; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 101; }
         .back-btn { color: var(--primary); font-size: 16px; font-weight: 500; cursor: pointer; border: none; background: none; padding: 5px 10px 5px 0; display: flex; align-items: center; }
         .nav-title { flex: 1; text-align: center; font-size: 17px; font-weight: 600; margin-right: 40px; } 
         .detail-content { padding: 15px; max-width: 600px; margin: 0 auto; padding-bottom: calc(var(--safe-bottom) + 30px); }
 
-        .card { background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; overflow: hidden; }
-        .card-header { background: #fafafc; padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .card-header h2 { margin: 0; font-size: 17px; color: var(--primary); }
+        /* 卡片基础样式 */
+        .card { background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 16px; overflow: hidden; border: 1px solid var(--border); }
+        .card-header { background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .card-header h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-main); }
         .actions { display: flex; gap: 10px; align-items: center; }
-        .btn-view-all { font-size: 13px; color: var(--primary); background: #e5f1ff; border: none; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-weight: 500; }
-        .btn-refresh { cursor: pointer; color: var(--text-muted); font-size: 16px; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; transition: background 0.2s; }
-        .btn-refresh:active { background: #e5e5ea; }
-        
+        .btn-view-all { font-size: 13px; color: var(--primary); background: #eff6ff; border: none; padding: 4px 12px; border-radius: 12px; cursor: pointer; font-weight: 500; }
+        .btn-refresh { cursor: pointer; color: var(--text-muted); font-size: 15px; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; transition: background 0.2s; }
+        .btn-refresh:active { background: #e2e8f0; }
         .card-content { padding: 16px; }
         
-        .sub-header { font-size: 15px; font-weight: 600; color: var(--text-main); margin: 16px 0 10px 0; padding-left: 8px; border-left: 3px solid var(--danger); }
+        .sub-header { font-size: 15px; font-weight: 600; color: var(--text-main); margin: 16px 0 10px 0; padding-left: 8px; border-left: 3px solid var(--primary); display: flex; align-items: center; justify-content: space-between; }
         .sub-header:first-child { margin-top: 0; }
         
+        /* 列表容器 */
         .data-list { display: flex; flex-direction: column; gap: 12px; }
-        
-        .media-item { display: flex; gap: 12px; text-decoration: none; color: inherit; padding-bottom: 12px; border-bottom: 1px solid var(--border); align-items: flex-start; }
-        .media-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .media-item { display: flex; gap: 10px; text-decoration: none; color: inherit; align-items: flex-start; }
         .media-item:active { opacity: 0.7; }
+        .media-content { flex: 1; min-width: 0; line-height: 1.5; }
         
-        .media-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+        /* 排序序号与圆点 */
+        .rank-num { font-weight: 700; font-size: 15px; width: 22px; flex-shrink: 0; text-align: center; }
+        .rank-top1 { color: #ef4444; } .rank-top2 { color: #f97316; } .rank-top3 { color: #f59e0b; } .rank-normal { color: #94a3b8; }
+        .bullet-dot { color: var(--primary); font-weight: bold; margin-right: 6px; font-size: 18px; line-height: 1; }
+
+        /* 特殊 UI 组件 (摸鱼、汇率、金价、历史等) */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .box-item { background: #f8fafc; border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center; }
+        .box-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+        .box-val { font-size: 15px; font-weight: 700; color: var(--text-main); }
         
-        .media-title { font-size: 15px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .full-text { font-size: 15px; line-height: 1.6; word-wrap: break-word; white-space: normal; } 
+        .progress-bg { width: 100%; background: #e2e8f0; border-radius: 99px; height: 8px; overflow: hidden; margin-top: 4px; }
+        .progress-bar { height: 100%; background: #06b6d4; border-radius: 99px; }
         
-        .media-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-        .tag { font-size: 11px; color: var(--text-muted); background: #f0f0f5; padding: 2px 6px; border-radius: 4px; }
-        .media-thumb { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #f0f0f5; }
+        .timeline { border-left: 2px solid #cbd5e1; margin-left: 10px; padding-left: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .timeline-item { position: relative; }
+        .timeline-dot { position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; background: #f59e0b; border-radius: 50%; border: 2px solid #fff; }
         
-        .weiyu { margin-top: 15px; padding: 12px; background: var(--bg-color); border-radius: 8px; font-size: 14px; color: #555; }
-        .image-box img { width: 100%; border-radius: 8px; display: block; }
-        .text-block { font-size: 15px; font-style: italic; color: #444; line-height: 1.6; padding: 10px; text-align: center; }
-        
-        .kv-list { display: flex; flex-wrap: wrap; gap: 10px; }
-        .kv-list .kv-item { width: calc(50% - 5px); background: #f8f8f8; padding: 10px; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        .kv-key { color: var(--text-muted); display: block; margin-bottom: 4px; font-size: 12px; }
-        .kv-val { font-weight: 600; color: var(--text-main); }
+        .weiyu { margin-top: 15px; padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 14px; color: #475569; }
         
         .loading-state { text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px; }
-        .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(0,122,255,0.2); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s ease-in-out infinite; margin-bottom: 10px; }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(59,130,246,0.2); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s linear infinite; margin-bottom: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -92,238 +95,341 @@
     </div>
 
     <script>
-        // 【核心修改】抛弃不稳定的名称拼接，全部替换为精确的完整 URL 数组
-        const configs = [
-            { 
-                id: 's60s', title: '每天60秒读懂世界', type: 'text-only',
-                urls: ['https://60s.viki.moe/v2/60s'] 
-            },
-            { 
-                id: 'ai', title: 'AI资讯快报', 
-                urls: ['https://60s.viki.moe/v2/ai-news'] 
-            },
-            { 
-                id: 'it', title: '实时IT资讯', 
-                urls: ['https://60s.viki.moe/v2/it-news'] 
-            },
-            { 
-                id: 'epic', title: 'Epic Games游戏', 
-                urls: ['https://60s.viki.moe/v2/epic'] 
-            },
-            { 
-                id: 'exchange', title: '当日货币汇率', type: 'kv',
-                urls: ['https://60s.viki.moe/v2/exchange-rate'] 
-            },
-            { 
-                id: 'gold', title: '黄金价格', type: 'kv',
-                urls: ['https://60s.viki.moe/v2/gold-price'] 
-            },
-            { 
-                id: 'gas', title: '汽油价格', type: 'kv',
-                urls: ['https://60s.viki.moe/v2/fuel-price'] 
-            },
-            { 
-                id: 'hot', title: '热点资讯', type: 'group', children: [
-                    { 
-                        id: 'tieba', title: '百度贴吧话题榜', limit: 3,
-                        urls: ['https://60s.viki.moe/v2/baidu/tieba'] 
-                    },
-                    { 
-                        id: 'douyin', title: '抖音热搜', limit: 3,
-                        urls: ['https://60s.viki.moe/v2/douyin'] 
-                    },
-                    { 
-                        id: 'bilibili', title: '哔哩哔哩热搜', limit: 3,
-                        urls: ['https://60s.viki.moe/v2/bili'] 
-                    },
-                    { 
-                        id: 'weibo', title: '微博热搜', limit: 3,
-                        urls: ['https://60s.viki.moe/v2/weibo'] 
-                    },
-                    { 
-                        id: 'xhs', title: '小红书热点', limit: 3,
-                        urls: ['https://60s.viki.moe/v2/rednote'] 
-                    }
-                ]
-            },
-            { 
-                id: 'history', title: '历史上的今天', 
-                urls: ['https://60s.viki.moe/v2/today-in-history'] 
-            },
-            { 
-                id: 'moyu', title: '摸鱼日报', type: 'image-prefer',
-                urls: ['https://60s.viki.moe/v2/moyu'] 
-            },
-            { 
-                id: 'word', title: '随机一言', 
-                urls: ['https://60s.viki.moe/v2/hitokoto'] 
+        // 汽油默认地区
+        let currentOilRegion = '广东';
+        window.changeOilCity = function(cardId) {
+            const newCity = prompt("请输入您想查询的省份或城市:", currentOilRegion);
+            if (newCity && newCity.trim() !== "") {
+                currentOilRegion = newCity.trim();
+                triggerFetch(cardId, false, true); // true 代表强制重载
             }
+        };
+
+        // --- 核心配置 ---
+        const configs = [
+            { id: 's60s', title: '每天60秒读懂世界', type: 'numbered-list', urls: ['https://60s.viki.moe/v2/60s', 'https://60s-api.viki.moe/v2/60s'] },
+            { id: 'ai', title: 'AI资讯快报', type: 'bullet-list', limit: 5, urls: ['https://60s.viki.moe/v2/ai-news', 'https://60s-api.viki.moe/v2/ai'] },
+            { id: 'epic', title: 'Epic Games游戏', type: 'game', urls: ['https://60s.viki.moe/v2/epic', 'https://60s-api.viki.moe/v2/epic'] },
+            { id: 'exchange', title: '当日货币汇率', type: 'exchange', urls: ['https://60s.viki.moe/v2/exchange-rate', 'https://60s-api.viki.moe/v2/exchange'] },
+            { id: 'gold', title: '黄金价格', type: 'gold', urls: ['https://60s.viki.moe/v2/gold-price', 'https://60s-api.viki.moe/v2/gold'] },
+            { id: 'gas', title: '汽油价格', type: 'oil', urls: ['https://60s.viki.moe/v2/fuel-price', 'https://60s-api.viki.moe/v2/oil'] },
+            
+            // 整合 IT 资讯并规范数量
+            { id: 'hot', title: '热点资讯', type: 'group', children: [
+                { id: 'tieba', title: '百度贴吧话题榜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/baidu/tieba'] },
+                { id: 'it', title: '实时IT资讯', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/it-news'] },
+                { id: 'douyin', title: '抖音热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/douyin'] },
+                { id: 'bilibili', title: '哔哩哔哩热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/bili'] },
+                { id: 'weibo', title: '微博热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/weibo'] },
+                { id: 'xhs', title: '小红书热点', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/rednote'] }
+            ]},
+            
+            { id: 'history', title: '历史上的今天', type: 'history', urls: ['https://60s.viki.moe/v2/today-in-history'] },
+            { id: 'moyu', title: '摸鱼日报', type: 'moyu', urls: ['https://60s.viki.moe/v2/moyu'] },
+            { id: 'word', title: '随机一言', type: 'quote', urls: ['https://60s.viki.moe/v2/hitokoto'] }
         ];
 
         const globalDataCache = {}; 
 
-        // 极简且高度健壮的网络引擎：只认明确的 URL
-        async function fetchWithFallbacks(urls) {
-            for (const url of urls) {
+        async function fetchWithFallbacks(urls, id) {
+            for (let url of urls) {
+                // 动态拼接油价地区参数
+                if (id === 'gas') {
+                    const sep = url.includes('?') ? '&' : '?';
+                    url = `${url}${sep}province=${encodeURIComponent(currentOilRegion)}&region=${encodeURIComponent(currentOilRegion)}`;
+                }
+
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 6000); 
-                
                 try {
                     const res = await fetch(url, { signal: controller.signal });
                     clearTimeout(timeoutId);
-                    if (res.ok) {
-                        return await res.json(); 
-                    }
-                } catch (e) { 
-                    clearTimeout(timeoutId); 
-                    // 如果当前 URL 失败，静默继续尝试数组中的下一个备用 URL
-                }
+                    if (res.ok) return await res.json(); 
+                } catch (e) { clearTimeout(timeoutId); }
             }
-            throw new Error(`所有 URL 节点均无法访问`);
+            throw new Error(`请求失败`);
+        }
+
+        // --- 核心解析层 ---
+        function extractCoreData(data) {
+            if (!data) return null;
+            if (typeof data === 'object' && !Array.isArray(data)) {
+                return data.data || data.result || data.list || data;
+            }
+            return data;
+        }
+
+        // --- 各类专属渲染组件 ---
+
+        // 1. 阿拉伯数字列表 (60s, 热榜, IT资讯)
+        function renderNumberedList(coreData, config, data, isDetail) {
+            let list = Array.isArray(coreData) ? coreData : (coreData.news || data.news || []);
+            if (!isDetail && config.limit) list = list.slice(0, config.limit);
+            if (list.length === 0) return '<div class="loading-state">暂无数据</div>';
+
+            let html = '<div class="data-list">';
+            list.forEach((item, idx) => {
+                let text = typeof item === 'object' ? (item.title || item.name || item.word || item.content || JSON.stringify(item)) : item;
+                let url = item.url || item.link || null;
+                
+                let rankClass = idx === 0 ? 'rank-top1' : idx === 1 ? 'rank-top2' : idx === 2 ? 'rank-top3' : 'rank-normal';
+                let contentStr = `<span class="rank-num ${rankClass}">${idx + 1}.</span><div class="media-content text-[15px]">${text}</div>`;
+                
+                if (url) html += `<a href="${url}" target="_blank" class="media-item">${contentStr}</a>`;
+                else html += `<div class="media-item">${contentStr}</div>`;
+            });
+            html += '</div>';
+
+            // 专属处理 60s 的微语
+            let weiyu = data.weiyu || coreData.weiyu || data.tip || '';
+            if (config.id === 's60s' && weiyu) html += `<div class="weiyu"><strong>微语：</strong>${weiyu}</div>`;
+            return html;
+        }
+
+        // 2. 圆点前缀列表 (AI 资讯)
+        function renderBulletList(coreData, config) {
+            let list = Array.isArray(coreData) ? coreData : (coreData.news || []);
+            if (config.limit) list = list.slice(0, config.limit);
+            if (list.length === 0) return '<div class="loading-state">暂无数据</div>';
+
+            let html = '<div class="data-list">';
+            list.forEach(item => {
+                let text = typeof item === 'object' ? (item.title || item.content) : item;
+                let detail = item.detail || item.description || '';
+                let url = item.url || item.link || null;
+                
+                let textHtml = `<div class="font-bold mb-1">${text}</div>`;
+                if (detail) textHtml += `<div class="text-[13px] text-gray-500 line-clamp-2">${detail}</div>`;
+
+                let contentStr = `<span class="bullet-dot">•</span><div class="media-content text-[15px]">${textHtml}</div>`;
+                if (url) html += `<a href="${url}" target="_blank" class="media-item">${contentStr}</a>`;
+                else html += `<div class="media-item">${contentStr}</div>`;
+            });
+            return html + '</div>';
+        }
+
+        // 3. 汇率渲染 (完全按需定制)
+        function renderExchange(coreData, data) {
+            let time = data.updated || data.time || data.update_time || '刚刚';
+            
+            // 精准抓取对应货币
+            const findCurrency = (keywords) => {
+                let target = Object.values(coreData).find(v => v.name && keywords.some(k => v.name.includes(k)));
+                if (!target) { // 尝试键名匹配
+                    const key = Object.keys(coreData).find(k => keywords.some(kw => k.toUpperCase().includes(kw)));
+                    target = coreData[key];
+                }
+                if (!target) return '-';
+                return target.price || target.value || target.rate || target;
+            };
+
+            const usd = findCurrency(['美元', 'USD']);
+            const jpy = findCurrency(['日元', 'JPY']);
+            const hkd = findCurrency(['港币', 'HKD']);
+
+            return `
+                <div class="text-[12px] text-gray-500 mb-3 flex justify-between">
+                    <span>📅 ${time.split(' ')[0]}</span>
+                    <span>基准: 🇨🇳 人民币 (CNY)</span>
+                </div>
+                <div class="grid-2">
+                    <div class="box-item"><div class="box-label">🇺🇸 美元 (USD)</div><div class="box-val">${usd}</div></div>
+                    <div class="box-item"><div class="box-label">🇯🇵 日元 (JPY)</div><div class="box-val">${jpy}</div></div>
+                    <div class="box-item"><div class="box-label">🇭🇰 港币 (HKD)</div><div class="box-val">${hkd}</div></div>
+                </div>
+            `;
+        }
+
+        // 4. 黄金渲染
+        function renderGold(coreData) {
+            let html = '';
+            // 基础金价
+            if (coreData.metals && Array.isArray(coreData.metals)) {
+                let basePrice = coreData.metals.find(m => m.name.includes('黄金'))?.today_price || coreData.metals[0].today_price;
+                html += `<div class="mb-4">
+                            <div class="text-[12px] text-gray-500 mb-2">💰 今日大盘基准</div>
+                            <div class="text-2xl font-bold text-yellow-600">${basePrice} <span class="text-[12px] text-gray-500 font-normal">元/克</span></div>
+                         </div>`;
+            }
+            // 品牌金价
+            if (coreData.stores && Array.isArray(coreData.stores)) {
+                html += `<div class="text-[12px] text-gray-500 mb-2">🏷️ 品牌金价 (部分)</div><div class="grid-2">`;
+                coreData.stores.slice(0, 6).forEach(s => {
+                    html += `<div class="box-item flex justify-between !text-left !px-3">
+                                <span class="text-[13px] text-gray-600">${s.brand}</span>
+                                <span class="font-bold text-[#f59e0b]">${s.price}</span>
+                             </div>`;
+                });
+                html += `</div>`;
+            }
+            return html || '<div class="loading-state">暂无黄金数据</div>';
+        }
+
+        // 5. 汽油渲染
+        function renderOil(coreData, data) {
+            let items = coreData.items || coreData || [];
+            let time = data.updated || data.time || '刚刚';
+            
+            const getPrice = (nameKey) => {
+                let item = Array.isArray(items) ? items.find(i => i.name && i.name.includes(nameKey)) : items[nameKey];
+                return item ? (item.price || item.value || item) : '-';
+            };
+
+            return `
+                <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+                    <span class="text-[12px] text-gray-400">${time.split(' ')[0]}</span>
+                    <button onclick="window.changeOilCity('gas')" class="text-[14px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded cursor-pointer flex items-center gap-1 hover:bg-green-100 transition-colors">
+                        📍 ${currentOilRegion} <span style="font-size:10px;">▼</span>
+                    </button>
+                </div>
+                <div class="grid-2">
+                    <div class="box-item !bg-green-50/50 !border-green-100"><div class="box-label">92# 汽油</div><div class="box-val text-green-700">${getPrice('92')}</div></div>
+                    <div class="box-item !bg-green-50/50 !border-green-100"><div class="box-label">95# 汽油</div><div class="box-val text-green-700">${getPrice('95')}</div></div>
+                    <div class="box-item !bg-green-50/50 !border-green-100"><div class="box-label">98# 汽油</div><div class="box-val text-green-700">${getPrice('98')}</div></div>
+                    <div class="box-item !bg-green-50/50 !border-green-100"><div class="box-label">0# 柴油</div><div class="box-val text-green-700">${getPrice('0')}</div></div>
+                </div>
+            `;
+        }
+
+        // 6. 历史上的今天
+        function renderHistory(coreData, data) {
+            let items = coreData.items || (Array.isArray(coreData) ? coreData : []);
+            let dateStr = data.date || coreData.date || '';
+            
+            let html = dateStr ? `<div class="mb-3 text-[13px] font-bold text-[#f59e0b] bg-amber-50 inline-block px-2 py-1 rounded">📅 ${dateStr}</div>` : '';
+            html += `<div class="timeline">`;
+            
+            items.slice(0, 15).forEach(item => {
+                let year = item.year || item.date || '未知';
+                let title = item.title || item.event || item;
+                html += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="text-[12px] font-bold text-amber-600 bg-amber-50 inline-block px-1 rounded mb-1">${year}</div>
+                        <div class="text-[14px] text-gray-800">${title}</div>
+                    </div>
+                `;
+            });
+            return html + `</div>`;
+        }
+
+        // 7. 摸鱼日报
+        function renderMoyu(coreData) {
+            // 如果返回的是图片，兼容显示
+            if (typeof coreData === 'string' || coreData.image) {
+                let img = coreData.image || coreData;
+                return `<img src="${img}" style="width:100%; border-radius:8px; display:block;">`;
+            }
+            
+            let progress = coreData.progress || {};
+            let holiday = coreData.nextHoliday || { name: '假期', until: '-' };
+            let quote = coreData.moyuQuote || '好好工作，努力摸鱼。';
+
+            const pb = (label, val) => `
+                <div class="mb-2">
+                    <div class="flex justify-between text-[12px] mb-1">
+                        <span class="text-gray-500">${label}</span>
+                        <span class="font-bold text-[#06b6d4]">${val || 0}%</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-bar" style="width: ${val || 0}%"></div></div>
+                </div>
+            `;
+
+            return `
+                <div class="bg-[#ecfeff] p-3 rounded-lg border border-[#cffafe] mb-4">
+                    ${pb('本周进度', progress.week?.percentage)}
+                    ${pb('今年进度', progress.year?.percentage)}
+                </div>
+                <div class="grid-2 mb-4">
+                    <div class="box-item !bg-orange-50 !border-orange-100">
+                        <div class="box-label !text-orange-400">距离周末</div>
+                        <div class="box-val !text-orange-500">${coreData.nextWeekend?.daysUntil || '-'} 天</div>
+                    </div>
+                    <div class="box-item !bg-emerald-50 !border-emerald-100">
+                        <div class="box-label !text-emerald-500">距离${holiday.name}</div>
+                        <div class="box-val !text-emerald-600">${holiday.until} 天</div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-lg text-[14px] text-gray-600 italic border-l-4 border-[#06b6d4]">
+                    "${quote}"
+                </div>
+            `;
+        }
+
+        // 8. 随机一言
+        function renderQuote(coreData) {
+            let text = coreData.hitokoto || coreData.text || coreData.word || typeof coreData === 'string' ? coreData : '';
+            let author = coreData.from || '佚名';
+            return `
+                <div class="text-center py-4 relative">
+                    <span style="font-size:60px; color:#f3e8ff; position:absolute; top:-20px; left:0; font-family:serif; line-height:1; user-select:none;">"</span>
+                    <p class="text-[16px] text-gray-700 font-medium italic relative z-10 px-4">${text}</p>
+                    <div class="text-[12px] text-right text-gray-400 mt-3 pr-2">—— ${author}</div>
+                </div>
+            `;
+        }
+        
+        // 9. 游戏 (Epic) 备用兼容
+        function renderGame(coreData) {
+            let list = Array.isArray(coreData) ? coreData : [];
+            if(list.length === 0) return '<div class="loading-state">暂无数据</div>';
+            let html = '<div class="data-list">';
+            list.forEach(item => {
+                html += `<a href="${item.link || '#'}" class="media-item border border-gray-100 rounded-lg p-2 hover:bg-gray-50">
+                            <div class="media-content">
+                                <div class="font-bold text-[14px] text-gray-800">${item.title || item.name}</div>
+                                <div class="text-[12px] text-gray-500 mt-1">🆓 免费截止: ${item.free_end || item.end_date || '未知'}</div>
+                            </div>
+                         </a>`;
+            });
+            return html + '</div>';
+        }
+
+        // --- 主干引擎 ---
+        function generateHTML(data, config, isDetailMode = false) {
+            if (!data) return '<div class="loading-state" style="color:var(--danger)">❌ 获取失败</div>';
+            let coreData = extractCoreData(data);
+            
+            switch(config.type) {
+                case 'numbered-list': return renderNumberedList(coreData, config, data, isDetailMode);
+                case 'bullet-list': return renderBulletList(coreData, config);
+                case 'exchange': return renderExchange(coreData, data);
+                case 'gold': return renderGold(coreData);
+                case 'oil': return renderOil(coreData, data);
+                case 'history': return renderHistory(coreData, data);
+                case 'moyu': return renderMoyu(coreData);
+                case 'quote': return renderQuote(coreData);
+                case 'game': return renderGame(coreData);
+                default: return '<div class="loading-state">未知格式</div>';
+            }
         }
 
         function initSkeleton() {
             const mainPage = document.getElementById('main-page');
             let html = '';
-
             configs.forEach(c => {
                 const isGroup = c.type === 'group';
                 let headerActions = `<div class="actions">`;
-                if (isGroup) {
-                    headerActions += `<button class="btn-view-all" onclick="toggleDetail(true)">查看完整 ➔</button>`;
-                } else {
-                    headerActions += `<div class="btn-refresh" title="重新加载" onclick="triggerFetch('${c.id}')">🔄</div>`;
-                }
+                if (isGroup) headerActions += `<button class="btn-view-all" onclick="toggleDetail(true)">查看完整 ➔</button>`;
+                else headerActions += `<div class="btn-refresh" onclick="triggerFetch('${c.id}')">🔄</div>`;
                 headerActions += `</div>`;
 
-                html += `<div class="card" id="card-${c.id}">
-                            <div class="card-header"><h2>${c.title}</h2>${headerActions}</div>
-                            <div class="card-content" id="content-${c.id}">`;
+                html += `<div class="card" id="card-${c.id}"><div class="card-header"><h2>${c.title}</h2>${headerActions}</div><div class="card-content" id="content-${c.id}">`;
 
                 if (isGroup) {
                     c.children.forEach(child => {
-                        html += `
-                            <div class="sub-header">
-                                ${child.title} 
-                                <span class="btn-refresh" style="display:inline-block; margin-left:10px; font-size:14px; vertical-align:middle;" onclick="triggerFetch('${child.id}', true)">🔄</span>
-                            </div>
-                            <div id="content-${child.id}"><div class="loading-state">加载中...</div></div>
-                        `;
+                        html += `<div class="sub-header">${child.title}<span class="btn-refresh" style="width:20px;height:20px;font-size:12px;" onclick="triggerFetch('${child.id}', true)">🔄</span></div>
+                                 <div id="content-${child.id}"><div class="loading-state">加载中...</div></div>`;
                     });
                 } else {
                     html += `<div class="loading-state"><div class="spinner"></div><br>数据抓取中...</div>`;
                 }
-                
                 html += `</div></div>`;
             });
             mainPage.innerHTML = html;
         }
 
-        function generateHTML(data, config, isDetailMode = false) {
-            if (!data) return '<div class="loading-state" style="color:var(--danger)">❌ 暂无数据或解析失败</div>';
-
-            let coreData = data;
-            if (typeof data === 'object' && !Array.isArray(data)) {
-                if (data.data) coreData = data.data;
-                else if (data.result) coreData = data.result;
-                else if (data.list) coreData = data.list;
-            }
-
-            // A. 纯文本模式 (专门适配 60s)
-            if (config.type === 'text-only') {
-                let newsList = [];
-                if (Array.isArray(coreData)) newsList = coreData;
-                else if (coreData && Array.isArray(coreData.news)) newsList = coreData.news;
-                else if (data && Array.isArray(data.news)) newsList = data.news;
-                
-                let weiyuText = (coreData && coreData.weiyu) || (data && data.weiyu) || (coreData && coreData.tip) || '';
-                
-                if (newsList.length === 0) return '<div class="loading-state">暂无文本数据</div>';
-
-                let html = '<div class="data-list">';
-                newsList.forEach(item => {
-                    let text = typeof item === 'object' ? (item.title || item.content || JSON.stringify(item)) : item;
-                    html += `<div class="media-item"><div class="media-content"><div class="full-text">${text}</div></div></div>`;
-                });
-                html += '</div>';
-                if (weiyuText) html += `<div class="weiyu"><strong>微语：</strong>${weiyuText}</div>`;
-                return html;
-            }
-
-            // B. 单图模式 (摸鱼日报)
-            if (config.type === 'image-prefer' || (typeof coreData === 'object' && !Array.isArray(coreData) && (coreData.image || coreData.url || coreData.img))) {
-                let src = coreData.image || coreData.img || coreData.url || coreData;
-                if (typeof src === 'string' && (src.startsWith('http') || src.startsWith('//'))) {
-                    return `<div class="image-box"><img src="${src}" alt="资讯图片"></div>`;
-                }
-            }
-
-            // C. 列表图文混排模式
-            if (Array.isArray(coreData)) {
-                let list = coreData;
-                if (!isDetailMode && config.limit) list = list.slice(0, config.limit); 
-                if (list.length === 0) return '<div class="loading-state">暂无内容</div>';
-                
-                let html = '<div class="data-list">';
-                list.forEach(item => {
-                    if (typeof item === 'string') {
-                        html += `<div class="media-item"><div class="media-content"><div class="media-title">${item}</div></div></div>`;
-                        return;
-                    }
-
-                    let title = item.title || item.name || item.keyword || item.word || item.desc || item.event || JSON.stringify(item);
-                    let url = item.url || item.link || item.href || item.mobileUrl;
-                    let img = item.image || item.img || item.pic || item.cover || item.thumb;
-                    
-                    let tagsHtml = '';
-                    if (item.hot) tagsHtml += `<span class="tag">🔥 ${item.hot}</span>`;
-                    if (item.year) tagsHtml += `<span class="tag">📅 ${item.year}年</span>`;
-                    if (item.price) tagsHtml += `<span class="tag">💰 ${item.price}</span>`;
-                    if (item.end_date) tagsHtml += `<span class="tag">截止: ${item.end_date}</span>`;
-
-                    let contentStr = `
-                        <div class="media-content">
-                            <div class="media-title">${title}</div>
-                            ${tagsHtml ? `<div class="media-tags">${tagsHtml}</div>` : ''}
-                        </div>
-                        ${img ? `<img src="${img}" class="media-thumb">` : ''}
-                    `;
-
-                    if (url) {
-                        html += `<a href="${url}" target="_blank" class="media-item">${contentStr}</a>`;
-                    } else {
-                        html += `<div class="media-item">${contentStr}</div>`;
-                    }
-                });
-                html += '</div>';
-                return html;
-            }
-
-            // D. 网格键值对模式 (汇率、金价、油价)
-            if (config.type === 'kv' || (typeof coreData === 'object' && coreData !== null && !Array.isArray(coreData))) {
-                let html = '<div class="kv-list">';
-                for (let key in coreData) {
-                    if (['code', 'status', 'msg', 'message', 'time', 'update_time', 'success'].includes(key)) continue;
-                    let val = coreData[key];
-                    let finalVal = '-';
-                    if (typeof val === 'string' || typeof val === 'number') { finalVal = val; } 
-                    else if (typeof val === 'object' && val !== null) { finalVal = val.price || val.value || val.rate || val.price92 || '-'; }
-                    html += `<div class="kv-item"><span class="kv-key">${key}</span><span class="kv-val">${finalVal}</span></div>`;
-                }
-                html += '</div>';
-                if (html === '<div class="kv-list"></div>') return '<div class="loading-state">数据暂无更新</div>';
-                return html;
-            }
-
-            // E. 单句文本模式 (一言)
-            let textStr = coreData.word || coreData.hitokoto || coreData.text || coreData.yiyan;
-            if (typeof coreData === 'string') textStr = coreData;
-            if (textStr && typeof textStr === 'string') return `<div class="text-block">“ ${textStr} ”</div>`;
-
-            return '<div class="loading-state">暂无对应格式数据</div>';
-        }
-
-        async function triggerFetch(targetId, isChild = false) {
+        async function triggerFetch(targetId, isChild = false, forceRefresh = false) {
             let conf = isChild 
                 ? configs.find(c => c.type === 'group').children.find(c => c.id === targetId)
                 : configs.find(c => c.id === targetId);
@@ -332,23 +438,12 @@
             container.innerHTML = `<div class="loading-state"><div class="spinner"></div></div>`;
 
             try {
-                // 现在 fetchWithFallbacks 接收的是精确的完整 URL 数组
-                const data = await fetchWithFallbacks(conf.urls);
+                const data = await fetchWithFallbacks(conf.urls, conf.id);
                 globalDataCache[conf.id] = data; 
                 container.innerHTML = generateHTML(data, conf, false);
             } catch (error) {
-                // 打印出首选 URL 方便排错
-                container.innerHTML = `<div class="loading-state" style="color:var(--danger)">❌ 获取失败<br><span style="font-size:11px;color:#999">${conf.urls[0]}</span></div>`;
-                console.error(`[${conf.title}] API请求失败:`, error);
+                container.innerHTML = `<div class="loading-state" style="color:var(--danger)">❌ 接口请求失败</div>`;
             }
-        }
-
-        function bootup() {
-            initSkeleton();
-            configs.forEach(c => {
-                if (c.type === 'group') c.children.forEach(child => triggerFetch(child.id, true));
-                else triggerFetch(c.id, false);
-            });
         }
 
         function toggleDetail(show) {
@@ -374,8 +469,15 @@
             }
         }
 
+        function bootup() {
+            initSkeleton();
+            configs.forEach(c => {
+                if (c.type === 'group') c.children.forEach(child => triggerFetch(child.id, true));
+                else triggerFetch(c.id, false);
+            });
+        }
+
         bootup();
     </script>
 </body>
 </html>
-
