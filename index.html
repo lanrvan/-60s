@@ -95,22 +95,22 @@
         // 【核心修复 1】更正了所有官方 API 接口的标准路由名称，增加了高概率命中备用数组
         const configs = [
             { id: 's60s', title: '每天60秒读懂世界', endpoints: ['60s'], type: 'text-only' },
-            { id: 'ai', title: 'AI资讯快报', endpoints: ['ai-news', 'ai'] },
-            { id: 'it', title: '实时IT资讯', endpoints: ['it-news', 'it'] },
+            { id: 'ai', title: 'AI资讯快报', endpoints: ['ai-news'] },
+            { id: 'it', title: '实时IT资讯', endpoints: ['it-news'] },
             { id: 'epic', title: 'Epic Games游戏', endpoints: ['epic'] },
-            { id: 'exchange', title: '当日货币汇率', endpoints: ['exchange-rate', 'exchange'], type: 'kv' },
-            { id: 'gold', title: '黄金价格', endpoints: ['gold-price', 'gold'], type: 'kv' },
-            { id: 'gas', title: '汽油价格', endpoints: ['oil-price', 'oil'], type: 'kv' },
+            { id: 'exchange', title: '当日货币汇率', endpoints: ['exchange-rate'], type: 'kv' },
+            { id: 'gold', title: '黄金价格', endpoints: ['gold-price'], type: 'kv' },
+            { id: 'gas', title: '汽油价格', endpoints: ['fuel-price'], type: 'kv' },
             { id: 'hot', title: '热点资讯', type: 'group', children: [
-                { id: 'tieba', title: '百度贴吧话题榜', endpoints: ['baidu-tieba', 'tieba'], limit: 3 },
+                { id: 'tieba', title: '百度贴吧话题榜', endpoints: ['tieba'], limit: 3 },
                 { id: 'douyin', title: '抖音热搜', endpoints: ['douyin'], limit: 3 },
                 { id: 'bilibili', title: '哔哩哔哩热搜', endpoints: ['bili'], limit: 3 },
                 { id: 'weibo', title: '微博热搜', endpoints: ['weibo'], limit: 3 },
-                { id: 'xhs', title: '小红书热点', endpoints: ['rednote', 'xiaohongshu'], limit: 3 }
+                { id: 'xhs', title: '小红书热点', endpoints: ['rednote'], limit: 3 }
             ]},
             { id: 'history', title: '历史上的今天', endpoints: ['today-in-history'] },
             { id: 'moyu', title: '摸鱼日报', endpoints: ['moyu'], type: 'image-prefer' },
-            { id: 'word', title: '随机一言', endpoints: ['word', 'yiyan'] }
+            { id: 'word', title: '随机一言', endpoints: ['hitokoto'] }
         ];
 
         const API_BASES = ['https://60s.viki.moe/v2/', 'https://60s-api.viki.moe/v2/'];
