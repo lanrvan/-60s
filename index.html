@@ -3,109 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- iOS Web App 专属标签，使其在主屏幕打开时隐藏浏览器沉浸式运行 -->
+    <!-- iOS Web App 专属标签，沉浸式无边框运行 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="每日60秒">
-    <!-- 桌面图标（请替换为实际存在的正方形图片URL） -->
+    <meta name="apple-mobile-web-app-title" content="每日热讯">
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/512/news.png">
     
-    <title>每天60秒读懂世界</title>
+    <title>全网热点资讯</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 15px; background: #f2f2f7; color: #1c1c1e; }
-        .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
-        .image-box img { width: 100%; display: block; }
-        .content { padding: 20px; }
-        .content h2 { margin-top: 0; font-size: 18px; color: #007aff; border-bottom: 2px solid #f0f0f5; padding-bottom: 10px; }
+        :root {
+            --bg-color: #f2f2f7;
+            --card-bg: #ffffff;
+            --text-main: #1c1c1e;
+            --text-muted: #8e8e93;
+            --primary: #007aff;
+            --danger: #ff3b30;
+            --border: #e5e5ea;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 15px; background: var(--bg-color); color: var(--text-main); }
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 30px; }
+        
+        /* 卡片化排版 */
+        .card { background: var(--card-bg); border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; overflow: hidden; }
+        .card-header { background: #fafafc; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .card-header h2 { margin: 0; font-size: 17px; color: var(--primary); }
+        .card-content { padding: 16px; }
+        
+        /* 二级标题 (用于热点资讯) */
+        .sub-header { font-size: 15px; font-weight: 600; color: var(--text-main); margin: 16px 0 10px 0; padding-left: 8px; border-left: 3px solid var(--danger); }
+        .sub-header:first-child { margin-top: 0; }
+        
+        /* 列表样式 */
         .news-list { list-style: none; padding: 0; margin: 0; }
-        .news-list li { padding: 10px 0; border-bottom: 1px solid #f0f0f5; font-size: 15px; line-height: 1.5; }
-        .weiyu { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; font-style: italic; color: #666; font-size: 14px; }
-        .loading { text-align: center; padding: 50px; color: #8e8e93; }
+        .news-list li { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 15px; line-height: 1.5; }
+        .news-list li:last-child { border-bottom: none; padding-bottom: 0; }
+        
+        /* 标签与微语 */
+        .tag { font-size: 12px; color: var(--text-muted); background: #f0f0f5; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+        .weiyu { margin-top: 15px; padding: 12px; background: var(--bg-color); border-radius: 8px; font-size: 14px; color: #555; }
+        
+        /* 图片与文字块 */
+        .image-box img { width: 100%; border-radius: 8px; display: block; }
+        .text-block { font-size: 15px; font-style: italic; color: #444; line-height: 1.6; padding: 10px; text-align: center; }
+        
+        /* 键值对网格 (用于汇率、金价等) */
+        .kv-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+        .kv-list li { width: 48%; background: #f8f8f8; padding: 10px; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .kv-key { color: var(--text-muted); display: block; margin-bottom: 4px; font-size: 12px; }
+        .kv-val { font-weight: 600; color: var(--text-main); }
+        
+        /* 状态提示 */
+        .loading { text-align: center; padding: 40px; color: var(--text-muted); font-size: 15px; }
+        .error { color: var(--danger); font-size: 14px; padding: 10px 0; text-align: center;}
     </style>
 </head>
 <body>
     <div class="container" id="app">
-        <div class="loading">正在加载今日数据...</div>
+        <div class="loading">正在并发加载全网资讯，请稍候...</div>
     </div>
 
-   <script>
-    async function fetchData() {
-        // 1. 准备多个官方公共节点，防止单点域名在国内被墙或失效
-        const urls = [
-            'https://60s.viki.moe/v2/60s',
-            'https://60s-api.viki.moe/v2/60s'
+    <script>
+        // --- 1. 核心配置区域（定义板块顺序、接口名称、数量限制） ---
+        const configs = [
+            { id: 's60s', title: '每天60秒读懂世界', endpoints: ['60s'], type: 'text-only' },
+            { id: 'ai', title: 'AI资讯快报', endpoints: ['ai', 'ainews'] },
+            { id: 'it', title: '实时IT资讯', endpoints: ['it', 'itnews'] },
+            { id: 'epic', title: 'Epic Games游戏', endpoints: ['epic'] },
+            { id: 'exchange', title: '当日货币汇率', endpoints: ['exchange', 'huilv'] },
+            { id: 'gold', title: '黄金价格', endpoints: ['gold', 'jinjia'] },
+            { id: 'gas', title: '汽油价格', endpoints: ['gas', 'oil', 'youjia'] },
+            { id: 'hot', title: '热点资讯', type: 'group', children: [
+                { id: 'tieba', title: '百度贴吧话题榜', endpoints: ['tieba'], limit: 3 },
+                { id: 'douyin', title: '抖音热搜', endpoints: ['douyin'], limit: 3 },
+                { id: 'bilibili', title: '哔哩哔哩热搜', endpoints: ['bilibili'], limit: 3 },
+                { id: 'weibo', title: '微博热搜', endpoints: ['weibo'], limit: 3 },
+                { id: 'xhs', title: '小红书热点', endpoints: ['xhs', 'xiaohongshu'], limit: 3 }
+            ]},
+            { id: 'moyu', title: '摸鱼日报', endpoints: ['moyu'], type: 'image-prefer' },
+            { id: 'word', title: '随机一言', endpoints: ['word', 'yiyan', 'hitokoto'] }
         ];
 
-        let response, res, success = false;
+        // --- 2. 网络请求与容灾处理引擎 ---
+        const API_BASES = ['https://60s.viki.moe/v2/', 'https://60s-api.viki.moe/v2/'];
 
-        // 2. 轮询请求，只要有一个域名成功就使用
-        for (const url of urls) {
-            try {
-                response = await fetch(url);
-                if (response.ok) {
-                    res = await response.json();
-                    success = true;
-                    break; 
+        // 带超时的 Fetch 防止某个接口挂掉导致页面卡死
+        async function fetchWithTimeout(resource, options = {}) {
+            const { timeout = 4000 } = options;
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            const response = await fetch(resource, { ...options, signal: controller.signal });
+            clearTimeout(id);
+            return response;
+        }
+
+        // 尝试多个备用域名和备用接口名
+        async function fetchWithFallbacks(endpoints) {
+            for (const base of API_BASES) {
+                for (const ep of endpoints) {
+                    try {
+                        const res = await fetchWithTimeout(`${base}${ep}`);
+                        if (res.ok) {
+                            const json = await res.json();
+                            // 智能剥离包裹层，提取真实数据
+                            if (json.code === 200 || json.status === 200) {
+                                return json.data !== undefined ? json.data : json;
+                            }
+                            return json; 
+                        }
+                    } catch (e) { /* 静默失败，继续尝试下一个备用地址 */ }
                 }
-            } catch (e) {
-                console.error(`节点 ${url} 访问失败，正在尝试备用节点...`, e);
             }
+            return null; // 全部落败
         }
 
-        // 3. 网络彻底断开或所有节点失效的处理
-        if (!success) {
-            document.getElementById('app').innerHTML = '<div class="loading">❌ 网络连接异常或接口服务暂不可用</div>';
-            return;
-        }
+        // --- 3. 智能数据解析与渲染引擎 ---
+        function formatData(data, config) {
+            if (!data) return '<div class="error">接口暂无数据或网络超时</div>';
 
-        // 4. 【核心修复】自动兼容扁平结构与包裹结构
-        let finalData = null;
-        if (res.code === 200 && res.data) {
-            finalData = res.data; // 适配带 code/data 结构的 API
-        } else if (res.news) {
-            finalData = res;      // 适配直接返回内容的扁平 API
-        }
-
-        // 5. 执行渲染或报错
-        if (finalData) {
-            renderUI(finalData);
-        } else {
-            document.getElementById('app').innerHTML = `<div class="loading">❌ 数据解析失败，接口返回状态码: ${res.code || '未知'}</div>`;
-        }
-    }
-
-    function renderUI(data) {
-        // 6. 兼容处理：判断 news 数组里是纯文本字符串，还是包含 title 的对象
-        const newsItems = data.news.map(item => {
-            if (typeof item === 'object' && item !== null) {
-                return `<li>${item.title || item.content || JSON.stringify(item)}</li>`;
+            // 规则 A: 每天60秒 (纯文本强行去除图片)
+            if (config.id === 's60s') {
+                let news = Array.isArray(data.news) ? data.news : (Array.isArray(data) ? data : []);
+                let weiyu = data.weiyu || data.tip || '';
+                let html = '<ul class="news-list">';
+                news.forEach(item => {
+                    let text = typeof item === 'object' ? (item.title || item.content || JSON.stringify(item)) : item;
+                    html += `<li>${text}</li>`;
+                });
+                html += '</ul>';
+                if (weiyu) html += `<div class="weiyu"><strong>微语：</strong>${weiyu}</div>`;
+                return html;
             }
-            return `<li>${item}</li>`;
-        }).join('');
-        
-        // 7. 兼容处理微语字段名（部分历史版本为 tip，新版为 weiyu）
-        const weiyuText = data.weiyu || data.tip || '暂无微语';
-        const imageSrc = data.image || '';
 
-        // 8. 动态生成 DOM 树
-        document.getElementById('app').innerHTML = `
-            <div class="image-box">
-                ${imageSrc ? `<img src="${imageSrc}" alt="今日60秒图片">` : ''}
-            </div>
-            <div class="content">
-                <h2>信息源列表</h2>
-                <ul class="news-list">
-                    ${newsItems}
-                </ul>
-                <div class="weiyu">
-                    <strong>微语：</strong>${weiyuText}
-                </div>
-            </div>
-        `;
-    }
+            // 提取核心数据载体
+            let coreData = data.data || data.list || data.news || data;
 
-    // 启动执行
-    fetchData();
-</script>
+            // 规则 B: 摸鱼日报等偏好图片的板块
+            if (config.type === 'image-prefer' || (typeof coreData === 'object' && !Array.isArray(coreData) && (coreData.image || coreData.img || coreData.url))) {
+                let src = coreData.image || coreData.img || coreData.url || coreData;
+                if (typeof src === 'string' && (src.startsWith('http') || src.startsWith('//'))) {
+                    return `<div class="image-box"><img src="${src}" alt="${config.title}"></div>`;
+                }
+            }
+
+            // 规则 C: 列表数据 (资讯、Epic游戏、热搜榜)
+            if (Array.isArray(coreData)) {
+                let list = coreData;
+                if (config.limit) list = list.slice(0, config.limit); // 截取前 N 名
+                if (list.length === 0) return '<div class="error">列表数据为空</div>';
+                
+                let html = '<ul class="news-list">';
+                list.forEach(item => {
+                    if (typeof item === 'string') {
+                        html += `<li>${item}</li>`;
+                    } else if (typeof item === 'object') {
+                        let title = item.title || item.name || item.keyword || item.word || item.desc || JSON.stringify(item);
+                        let extra = '';
+                        // 智能提取附加信息，如热度、截止时间、价格
+                        if (item.hot) extra += `<span class="tag">🔥 ${item.hot}</span>`;
+                        if (item.end_date) extra += `<span class="tag">截止: ${item.end_date}</span>`;
+                        if (item.price) extra += `<span class="tag">价格: ${item.price}</span>`;
+                        html += `<li>${title} ${extra}</li>`;
+                    }
+                });
+                html += '</ul>';
+                return html;
+            }
+
+            // 规则 D: 单文本 (随机一言)
+            let textStr = coreData.word || coreData.hitokoto || coreData.text || coreData.content || coreData.yiyan;
+            if (typeof coreData === 'string') textStr = coreData;
+            if (textStr && typeof textStr === 'string') return `<div class="text-block">“ ${textStr} ”</div>`;
+
+            // 规则 E: 键值对对象 (汇率、金价、油价)
+            if (typeof coreData === 'object' && coreData !== null) {
+                let html = '<ul class="kv-list">';
+                for (let key in coreData) {
+                    if (['code', 'status', 'msg', 'message', 'time', 'update_time'].includes(key)) continue;
+                    let val = coreData[key];
+                    if (typeof val === 'string' || typeof val === 'number') {
+                        html += `<li><span class="kv-key">${key}</span><span class="kv-val">${val}</span></li>`;
+                    } else if (typeof val === 'object' && val !== null) {
+                        let subVal = val.price || val.value || val.rate || val.price92 || '-';
+                        html += `<li><span class="kv-key">${key}</span><span class="kv-val">${subVal}</span></li>`;
+                    }
+                }
+                html += '</ul>';
+                if (html === '<ul class="kv-list"></ul>') return '<div class="error">暂无适用数据</div>';
+                return html;
+            }
+
+            return '<div class="error">无法解析的数据格式</div>';
+        }
+
+        // --- 4. 主控初始化函数 ---
+        async function init() {
+            const app = document.getElementById('app');
+            const results = {};
+            const fetchPromises = [];
+
+            // 1. 发起所有并发请求
+            const queueFetch = (conf) => {
+                const p = fetchWithFallbacks(conf.endpoints).then(data => { results[conf.id] = data; });
+                fetchPromises.push(p);
+            };
+
+            configs.forEach(c => c.type === 'group' ? c.children.forEach(queueFetch) : queueFetch(c));
+
+            // 2. 等待所有接口返回（无论成功失败，最多等 4 秒左右）
+            await Promise.allSettled(fetchPromises);
+            
+            // 3. 清空 Loading，按既定顺序渲染 DOM
+            app.innerHTML = '';
+            
+            configs.forEach(c => {
+                let html = `<div class="card"><div class="card-header"><h2>${c.title}</h2></div><div class="card-content">`;
+                
+                if (c.type === 'group') {
+                    // 处理二级子板块 (如：热点资讯下的贴吧、抖音等)
+                    c.children.forEach(child => {
+                        html += `<div class="sub-header">${child.title}</div>`;
+                        html += formatData(results[child.id], child);
+                    });
+                } else {
+                    // 处理一级独立板块
+                    html += formatData(results[c.id], c);
+                }
+                
+                html += `</div></div>`;
+                app.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // 启动应用
+        init();
+    </script>
 </body>
 </html>
