@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- iOS Web App 专属标签，使其在主屏幕打开时隐藏浏览器沉浸式运行 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="每日60秒">
+    <!-- 桌面图标（请替换为实际存在的正方形图片URL） -->
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/512/news.png">
+    
+    <title>每天60秒读懂世界</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 15px; background: #f2f2f7; color: #1c1c1e; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+        .image-box img { width: 100%; display: block; }
+        .content { padding: 20px; }
+        .content h2 { margin-top: 0; font-size: 18px; color: #007aff; border-bottom: 2px solid #f0f0f5; padding-bottom: 10px; }
+        .news-list { list-style: none; padding: 0; margin: 0; }
+        .news-list li { padding: 10px 0; border-bottom: 1px solid #f0f0f5; font-size: 15px; line-height: 1.5; }
+        .weiyu { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; font-style: italic; color: #666; font-size: 14px; }
+        .loading { text-align: center; padding: 50px; color: #8e8e93; }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <div class="loading">正在加载今日数据...</div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            try {
+                // 调用默认 JSON 接口
+                const response = await fetch('https://60s.viki.moe/v2/60s');
+                const res = await response.json();
+
+                if (res.status === 200) {
+                    renderUI(res.data);
+                } else {
+                    document.getElementById('app').innerHTML = '<div class="loading">数据获取失败</div>';
+                }
+            } catch (error) {
+                document.getElementById('app').innerHTML = '<div class="loading">网络连接异常</div>';
+            }
+        }
+
+        function renderUI(data) {
+            // 生成新闻列表
+            const newsItems = data.news.map(item => `<li>${item}</li>`).join('');
+            
+            // 渲染 DOM
+            document.getElementById('app').innerHTML = `
+                <div class="image-box">
+                    <img src="${data.image}" alt="今日60秒图片">
+                </div>
+                <div class="content">
+                    <h2>文本信息源</h2>
+                    <ul class="news-list">
+                        ${newsItems}
+                    </ul>
+                    <div class="weiyu">
+                        <strong>微语：</strong>${data.weiyu}
+                    </div>
+                </div>
+            `;
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
