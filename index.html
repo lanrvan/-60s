@@ -100,9 +100,9 @@
             { id: 'epic', title: 'Epic Games游戏', endpoints: ['epic'] },
             { id: 'exchange', title: '当日货币汇率', endpoints: ['exchange-rate'], type: 'kv' },
             { id: 'gold', title: '黄金价格', endpoints: ['gold-price'], type: 'kv' },
-            { id: 'gas', title: '汽油价格', endpoints: ['fuel-price'], type: 'kv' },
+            { id: 'gas', title: '汽油价格', endpoints: ['fuel-price','oil-price'], type: 'kv' },
             { id: 'hot', title: '热点资讯', type: 'group', children: [
-                { id: 'tieba', title: '百度贴吧话题榜', endpoints: ['tieba'], limit: 3 },
+                { id: 'tieba', title: '百度贴吧话题榜', endpoints: ['tieba','baidu-tieba'], limit: 3 },
                 { id: 'douyin', title: '抖音热搜', endpoints: ['douyin'], limit: 3 },
                 { id: 'bilibili', title: '哔哩哔哩热搜', endpoints: ['bili'], limit: 3 },
                 { id: 'weibo', title: '微博热搜', endpoints: ['weibo'], limit: 3 },
@@ -110,7 +110,7 @@
             ]},
             { id: 'history', title: '历史上的今天', endpoints: ['today-in-history'] },
             { id: 'moyu', title: '摸鱼日报', endpoints: ['moyu'], type: 'image-prefer' },
-            { id: 'word', title: '随机一言', endpoints: ['hitokoto'] }
+            { id: 'word', title: '随机一言', endpoints: ['hitokoto','word'] }
         ];
 
         const API_BASES = ['https://60s.viki.moe/v2/', 'https://60s-api.viki.moe/v2/'];
