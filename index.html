@@ -6,9 +6,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="每日热讯">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/?size=100&id=AzIYFayqzkbl&format=png&color=000000">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/512/news.png">
     
-    <title>每日60s信息流</title>
+    <title>全网热点资讯</title>
     <style>
         :root {
             --bg-color: #f1f5f9;
@@ -60,6 +60,13 @@
         .rank-top1 { color: #ef4444; } .rank-top2 { color: #f97316; } .rank-top3 { color: #f59e0b; } .rank-normal { color: #94a3b8; }
         .bullet-dot { color: var(--primary); font-weight: bold; margin-right: 6px; font-size: 18px; line-height: 1; }
 
+        /* Epic 游戏卡片专属悬浮特效 */
+        .epic-card { display: block; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; background: var(--card-bg); transition: box-shadow 0.2s ease; }
+        .epic-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .epic-img-wrapper { width: 100%; height: 160px; overflow: hidden; background: #f8fafc; }
+        .epic-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .epic-card:hover .epic-img { transform: scale(1.05); }
+
         /* 特殊 UI 组件 */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -105,7 +112,6 @@
             }
         };
 
-        // --- 核心配置（已加入多重保险 URL 阵列） ---
         const configs = [
             { id: 's60s', title: '每天60秒读懂世界', type: 'numbered-list', urls: ['https://60s.viki.moe/v2/60s', 'https://60s-api.viki.moe/v2/60s'] },
             { id: 'ai', title: 'AI资讯快报', type: 'bullet-list', limit: 5, urls: ['https://60s.viki.moe/v2/ai', 'https://60s.viki.moe/v2/ai-news'] },
@@ -118,7 +124,7 @@
                 { id: 'tieba', title: '百度贴吧话题榜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/baidu/tieba'] },
                 { id: 'it', title: '实时IT资讯', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/it', 'https://60s.viki.moe/v2/it-news'] },
                 { id: 'douyin', title: '抖音热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/douyin'] },
-                { id: 'bilibili', title: '哔哩哔哩热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/bili'] },
+                { id: 'bilibili', title: '哔哩哔哩热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/bilibili'] },
                 { id: 'weibo', title: '微博热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/weibo'] },
                 { id: 'xhs', title: '小红书热点', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/xhs', 'https://60s.viki.moe/v2/rednote'] }
             ]},
@@ -130,94 +136,21 @@
 
         const globalDataCache = {}; 
 
-        const requestTracker = {};
-
-              async function fetchWithFallbacks(urls, id) {
-        
-            let lastError = null;
-        
+        async function fetchWithFallbacks(urls, id) {
             for (let url of urls) {
-        
                 if (id === 'gas') {
-        
                     const sep = url.includes('?') ? '&' : '?';
-        
-                    url =
-                        `${url}${sep}province=${encodeURIComponent(currentOilRegion)}&region=${encodeURIComponent(currentOilRegion)}`;
+                    url = `${url}${sep}province=${encodeURIComponent(currentOilRegion)}&region=${encodeURIComponent(currentOilRegion)}`;
                 }
-        
                 const controller = new AbortController();
-        
-                // 黄金接口必须更长超时
-                const timeout =
-                    id === 'gold'
-                        ? 15000
-                        : 10000;
-        
-                const timeoutId = setTimeout(
-                    () => controller.abort(),
-                    timeout
-                );
-        
+                const timeoutId = setTimeout(() => controller.abort(), 6000); 
                 try {
-        
-                    const res = await fetch(url, {
-                        signal: controller.signal
-                    });
-        
+                    const res = await fetch(url, { signal: controller.signal });
                     clearTimeout(timeoutId);
-        
-                    if (!res.ok) {
-                        continue;
-                    }
-        
-                    // 先获取文本
-                    const text = await res.text();
-        
-                    if (!text || text.length < 10) {
-                        continue;
-                    }
-        
-                    // 再解析 JSON
-                    let json;
-        
-                    try {
-                        json = JSON.parse(text);
-                    } catch {
-        
-                        // 防止返回 HTML
-                        continue;
-                    }
-        
-                    // 防止空对象
-                    if (
-                        !json ||
-                        typeof json !== 'object'
-                    ) {
-                        continue;
-                    }
-        
-                    // code 校验
-                    if (
-                        json.code &&
-                        json.code !== 200
-                    ) {
-                        continue;
-                    }
-        
-                    return json;
-        
-                } catch (e) {
-        
-                    clearTimeout(timeoutId);
-        
-                    lastError = e;
-        
-                    continue;
-                }
+                    if (res.ok) return await res.json(); 
+                } catch (e) { clearTimeout(timeoutId); }
             }
-        
-            throw lastError || new Error('请求失败');
+            throw new Error(`请求失败`);
         }
 
         function extractCoreData(data) {
@@ -275,107 +208,91 @@
         }
 
         // --- 3. 完美智能汇率引擎 ---
-                       function renderExchange(coreData) {
-            
-                // 核心：真正的汇率数组
-                const rates = coreData.rates || [];
-            
-                // 获取指定货币
-                function getRate(currencyCode) {
-            
-                    const item = rates.find(
-                        x => x.currency === currencyCode
-                    );
-            
-                    if (!item) return '-';
-            
-                    const val = parseFloat(item.rate);
-            
-                    if (isNaN(val)) return '-';
-            
-                    // 当前接口已经是：
-                    // 1 CNY = xxx 外币
-                    // 不需要再反转
-                    return val.toFixed(4);
-                }
-            
-                const usd = getRate('USD');
-                const jpy = getRate('JPY');
-                const hkd = getRate('HKD');
-            
-                return `
-                    <div class="grid-2">
-            
-                        <div class="box-item !bg-red-50 !border-red-100">
-                            <div class="box-label !text-red-500">
-                                🇨🇳 人民币 (CNY)
-                            </div>
-            
-                            <div class="box-val !text-red-600">
-                                1.0000
-                            </div>
-                        </div>
-            
-                        <div class="box-item">
-                            <div class="box-label">
-                                🇺🇸 美元 (USD)
-                            </div>
-            
-                            <div class="box-val">
-                                ${usd}
-                            </div>
-                        </div>
-            
-                        <div class="box-item">
-                            <div class="box-label">
-                                🇯🇵 日元 (JPY)
-                            </div>
-            
-                            <div class="box-val">
-                                ${jpy}
-                            </div>
-                        </div>
-            
-                        <div class="box-item">
-                            <div class="box-label">
-                                🇭🇰 港币 (HKD)
-                            </div>
-            
-                            <div class="box-val">
-                                ${hkd}
-                            </div>
-                        </div>
-            
-                    </div>
-                `;
+       function renderExchange(coreData) {
+        
+            // 核心：真正的汇率数组
+            const rates = coreData.rates || [];
+        
+            // 获取指定货币
+            function getRate(currencyCode) {
+        
+                const item = rates.find(
+                    x => x.currency === currencyCode
+                );
+        
+                if (!item) return '-';
+        
+                const val = parseFloat(item.rate);
+        
+                if (isNaN(val)) return '-';
+        
+                // 当前接口已经是：
+                // 1 CNY = xxx 外币
+                // 不需要再反转
+                return val.toFixed(4);
             }
+        
+            const usd = getRate('USD');
+            const jpy = getRate('JPY');
+            const hkd = getRate('HKD');
+        
+            return `
+                <div class="grid-2">
+        
+                    <div class="box-item !bg-red-50 !border-red-100">
+                        <div class="box-label !text-red-500">
+                            🇨🇳 人民币 (CNY)
+                        </div>
+        
+                        <div class="box-val !text-red-600">
+                            1.0000
+                        </div>
+                    </div>
+        
+                    <div class="box-item">
+                        <div class="box-label">
+                            🇺🇸 美元 (USD)
+                        </div>
+        
+                        <div class="box-val">
+                            ${usd}
+                        </div>
+                    </div>
+        
+                    <div class="box-item">
+                        <div class="box-label">
+                            🇯🇵 日元 (JPY)
+                        </div>
+        
+                        <div class="box-val">
+                            ${jpy}
+                        </div>
+                    </div>
+        
+                    <div class="box-item">
+                        <div class="box-label">
+                            🇭🇰 港币 (HKD)
+                        </div>
+        
+                        <div class="box-val">
+                            ${hkd}
+                        </div>
+                    </div>
+        
+                </div>
+            `;
+        }
+        
         // --- 4. 黄金排版引擎 ---
         function renderGold(coreData) {
-                               const metals = Array.isArray(coreData)
-                            ? coreData
-                            : (coreData.metals || []);
-                    
-                        const stores = coreData.stores || [];
-                    
-                        const getMetal = (name) => {
-                            let m = metals.find(x =>
-                                x.name && x.name.includes(name)
-                            ) || {};
-                    
-                            return {
-                                today: m.today_price || m.price || '-',
-                                sell: m.sell_price || m.retail_price || '-'
-                            };
-                        };
-                    
-                        const getStore = (brand) => {
-                            let s = stores.find(x =>
-                                x.brand && x.brand.includes(brand)
-                            ) || {};
-                    
-                            return s.price || '-';
-                        };
-
+            const getMetal = (name) => {
+                let m = (coreData.metals || []).find(x => x.name && x.name.includes(name)) || {};
+                return { today: m.today_price || m.price || '-', sell: m.sell_price || m.retail_price || m.out_price || '-' };
+            };
+            const getStore = (brand) => {
+                let s = (coreData.stores || []).find(x => x.brand && x.brand.includes(brand)) || {};
+                return s.price || s.today_price || '-';
+            };
 
             let gold = getMetal('黄金');
             let silver = getMetal('白银');
@@ -501,7 +418,7 @@
             `;
         }
 
-        // --- 8. 随机一言 (彻底解决 Object 乱码) ---
+        // --- 8. 随机一言 ---
         function renderQuote(coreData) {
             let text = '';
             let author = '佚名';
@@ -522,22 +439,25 @@
             `;
         }
         
-        // --- 9. 游戏 (Epic) 左图右文精美缩略排版 ---
+        // --- 9. 游戏 (Epic) - 上下排版，添加放大动效与绿色背景免费标签 ---
         function renderGame(coreData) {
             let list = Array.isArray(coreData) ? coreData : [];
             if(list.length === 0) return '<div class="loading-state">暂无数据</div>';
             
-            let html = '<div class="data-list">';
+            let html = '<div class="data-list" style="display: grid; gap: 15px; grid-template-columns: 1fr;">';
             list.forEach(item => {
                 let cover = item.cover || item.image || item.image_url || item.thumbnail || '';
-                // 使用 flex 排版，左边固定宽度图片，右边文字
-                html += `<a href="${item.link || '#'}" target="_blank" class="flex items-center gap-3 border border-gray-100 rounded-lg p-2 hover:bg-gray-50 transition-colors">
-                            ${cover ? `<img src="${cover}" style="width: 110px; height: 62px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #f8fafc;">` : ''}
-                            <div class="media-content">
-                                <div class="font-bold text-[14px] text-gray-800 line-clamp-2 leading-snug">${item.title || item.name}</div>
-                                <div class="text-[12px] text-gray-500 mt-1.5 flex gap-2 items-center">
-                                    <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded" style="font-size:10px;">免费</span>
-                                    <span class="truncate">截止: ${item.free_end || item.end_date || '未知'}</span>
+                
+                html += `<a href="${item.link || '#'}" target="_blank" class="epic-card">
+                            ${cover ? `
+                            <div class="epic-img-wrapper">
+                                <img src="${cover}" class="epic-img">
+                            </div>` : ''}
+                            <div style="padding: 12px;">
+                                <div style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.title || item.name}</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted);">
+                                    <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: bold;">免费</span>
+                                    <span>截止: ${item.free_end || item.end_date || '未知'}</span>
                                 </div>
                             </div>
                          </a>`;
@@ -589,82 +509,22 @@
             mainPage.innerHTML = html;
         }
 
-         async function triggerFetch(targetId, isChild = false) {
-            
-                let conf = isChild
-                    ? configs.find(c => c.type === 'group')
-                        .children.find(c => c.id === targetId)
-                    : configs.find(c => c.id === targetId);
-            
-                if (!conf) return;
-            
-                const container =
-                    document.getElementById(`content-${conf.id}`);
-            
-                if (!container) return;
-            
-                // 当前请求ID
-                const requestId = Date.now() + Math.random();
-            
-                // 记录最新请求
-                requestTracker[conf.id] = requestId;
-            
-                container.innerHTML = `
-                    <div class="loading-state">
-                        <div class="spinner"></div>
-                        <br>
-                        数据抓取中...
-                    </div>
-                `;
-            
-                try {
-            
-                    const data =
-                        await fetchWithFallbacks(
-                            conf.urls,
-                            conf.id
-                        );
-            
-                    // 如果不是最新请求
-                    // 直接丢弃
-                    if (
-                        requestTracker[conf.id] !== requestId
-                    ) {
-                        return;
-                    }
-            
-                    globalDataCache[conf.id] = data;
-            
-                    container.innerHTML =
-                        generateHTML(
-                            data,
-                            conf,
-                            false
-                        );
-            
-                } catch (error) {
-            
-                    // 防止旧请求覆盖
-                    if (
-                        requestTracker[conf.id] !== requestId
-                    ) {
-                        return;
-                    }
-            
-                    console.error(
-                        '[接口失败]',
-                        conf.id,
-                        error
-                    );
-            
-                    container.innerHTML = `
-                        <div class="loading-state"
-                             style="color:var(--danger)">
-                             ❌ 接口请求失败
-                        </div>
-                    `;
-                }
+        async function triggerFetch(targetId, isChild = false, forceRefresh = false) {
+            let conf = isChild 
+                ? configs.find(c => c.type === 'group').children.find(c => c.id === targetId)
+                : configs.find(c => c.id === targetId);
+
+            const container = document.getElementById(`content-${conf.id}`);
+            container.innerHTML = `<div class="loading-state"><div class="spinner"></div></div>`;
+
+            try {
+                const data = await fetchWithFallbacks(conf.urls, conf.id);
+                globalDataCache[conf.id] = data; 
+                container.innerHTML = generateHTML(data, conf, false);
+            } catch (error) {
+                container.innerHTML = `<div class="loading-state" style="color:var(--danger)">❌ 接口请求失败</div>`;
             }
+        }
 
         function toggleDetail(show) {
             const mainPage = document.getElementById('main-page');
@@ -686,6 +546,16 @@
             } else {
                 detailPage.classList.remove('active');
                 mainPage.classList.add('active');
+                
+                // 平滑滚动回热点资讯板块
+                setTimeout(() => {
+                    const hotCard = document.getElementById('card-hot');
+                    if (hotCard) {
+                        const offset = 20; 
+                        const top = hotCard.getBoundingClientRect().top + window.pageYOffset - offset;
+                        window.scrollTo({ top: top, behavior: 'smooth' });
+                    }
+                }, 10);
             }
         }
 
