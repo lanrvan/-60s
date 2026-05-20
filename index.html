@@ -137,11 +137,21 @@
                     url = `${url}${sep}province=${encodeURIComponent(currentOilRegion)}&region=${encodeURIComponent(currentOilRegion)}`;
                 }
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 6000); 
+                const timeoutId = setTimeout(() => controller.abort(), 12000); 
                 try {
                     const res = await fetch(url, { signal: controller.signal });
                     clearTimeout(timeoutId);
-                    if (res.ok) return await res.json(); 
+                    if (res.ok) {
+                    const json = await res.json();
+                
+                    // 防止空数据
+                    if (
+                        json &&
+                        Object.keys(json).length > 0
+                    ) {
+                        return json;
+                    }
+                }
                 } catch (e) { clearTimeout(timeoutId); }
             }
             throw new Error(`请求失败`);
@@ -202,61 +212,121 @@
         }
 
         // --- 3. 完美智能汇率引擎 (剔除日期，强制计算 1 CNY 等于多少外币) ---
-        function renderExchange(coreData) {
-            const getConvertedRate = (keywords) => {
-                let target = null;
-                // 深度提取匹配对应外币的数值
+            function renderExchange(coreData) {
+
+            function findRate(code, aliases = []) {
+        
+                // 数组结构
                 if (Array.isArray(coreData)) {
-                    let item = coreData.find(v => keywords.some(kw => JSON.stringify(v).includes(kw)));
-                    if (item) target = item.price || item.value || item.rate || item.hui_lv || item.amount || Object.values(item).find(val => !isNaN(parseFloat(val)));
-                } else if (typeof coreData === 'object') {
-                    for(let k in coreData) {
-                        let val = coreData[k];
-                        if (keywords.some(kw => k.toUpperCase().includes(kw) || (val && val.name && val.name.includes(kw)))) {
-                            target = typeof val === 'object' ? (val.price || val.value || val.rate || val.hui_lv || val.amount) : val;
-                            break;
+        
+                    for (const item of coreData) {
+        
+                        const str = JSON.stringify(item).toUpperCase();
+        
+                        if (
+                            str.includes(code) ||
+                            aliases.some(a => str.includes(a))
+                        ) {
+        
+                            // 自动寻找数字字段
+                            for (const key in item) {
+                                const val = parseFloat(item[key]);
+        
+                                if (!isNaN(val) && val > 0) {
+        
+                                    // 自动识别 100 外币基准
+                                    return val > 50
+                                        ? (100 / val).toFixed(4)
+                                        : (1 / val).toFixed(4);
+                                }
+                            }
                         }
                     }
                 }
-                
-                if (!target) return '-';
-                
-                let val = parseFloat(target);
-                if (isNaN(val) || val === 0) return '-';
-                
-                // 自动推算基准(有些接口返回 100外币=多少人民币，有些返回 1外币=多少人民币)
-                let base = val > 50 ? 100 : 1; 
-                // 返回 1人民币 = ? 外币
-                return (base / val).toFixed(4);
-            };
-
-            const usd = getConvertedRate(['USD', '美元']);
-            const jpy = getConvertedRate(['JPY', '日元']);
-            const hkd = getConvertedRate(['HKD', '港币']);
-
+        
+                // 对象结构
+                if (typeof coreData === 'object') {
+        
+                    for (const key in coreData) {
+        
+                        const upperKey = key.toUpperCase();
+        
+                        if (
+                            upperKey.includes(code) ||
+                            aliases.some(a => upperKey.includes(a))
+                        ) {
+        
+                            const val = parseFloat(coreData[key]);
+        
+                            if (!isNaN(val) && val > 0) {
+        
+                                return val > 50
+                                    ? (100 / val).toFixed(4)
+                                    : (1 / val).toFixed(4);
+                            }
+                        }
+                    }
+                }
+        
+                return '-';
+            }
+        
+            const usd = findRate('USD', ['美元']);
+            const jpy = findRate('JPY', ['日元']);
+            const hkd = findRate('HKD', ['港币']);
+        
             return `
                 <div class="grid-2">
                     <div class="box-item !bg-red-50 !border-red-100">
                         <div class="box-label !text-red-500">🇨🇳 人民币 (CNY)</div>
                         <div class="box-val !text-red-600">1.0000</div>
                     </div>
-                    <div class="box-item"><div class="box-label">🇺🇸 美元 (USD)</div><div class="box-val">${usd}</div></div>
-                    <div class="box-item"><div class="box-label">🇯🇵 日元 (JPY)</div><div class="box-val">${jpy}</div></div>
-                    <div class="box-item"><div class="box-label">🇭🇰 港币 (HKD)</div><div class="box-val">${hkd}</div></div>
+        
+                    <div class="box-item">
+                        <div class="box-label">🇺🇸 美元 (USD)</div>
+                        <div class="box-val">${usd}</div>
+                    </div>
+        
+                    <div class="box-item">
+                        <div class="box-label">🇯🇵 日元 (JPY)</div>
+                        <div class="box-val">${jpy}</div>
+                    </div>
+        
+                    <div class="box-item">
+                        <div class="box-label">🇭🇰 港币 (HKD)</div>
+                        <div class="box-val">${hkd}</div>
+                    </div>
                 </div>
             `;
         }
 
         // --- 4. 黄金排版引擎 ---
         function renderGold(coreData) {
-            const getMetal = (name) => {
-                let m = (coreData.metals || []).find(x => x.name && x.name.includes(name)) || {};
-                return { today: m.today_price || m.price || '-', sell: m.sell_price || m.retail_price || m.out_price || '-' };
-            };
-            const getStore = (brand) => {
-                let s = (coreData.stores || []).find(x => x.brand && x.brand.includes(brand)) || {};
-                return s.price || s.today_price || '-';
-            };
+                               const metals = Array.isArray(coreData)
+                            ? coreData
+                            : (coreData.metals || []);
+                    
+                        const stores = coreData.stores || [];
+                    
+                        const getMetal = (name) => {
+                            let m = metals.find(x =>
+                                x.name && x.name.includes(name)
+                            ) || {};
+                    
+                            return {
+                                today: m.today_price || m.price || '-',
+                                sell: m.sell_price || m.retail_price || '-'
+                            };
+                        };
+                    
+                        const getStore = (brand) => {
+                            let s = stores.find(x =>
+                                x.brand && x.brand.includes(brand)
+                            ) || {};
+                    
+                            return s.price || '-';
+                        };
+
 
             let gold = getMetal('黄金');
             let silver = getMetal('白银');
