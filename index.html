@@ -130,31 +130,92 @@
 
         const globalDataCache = {}; 
 
-        async function fetchWithFallbacks(urls, id) {
+              async function fetchWithFallbacks(urls, id) {
+        
+            let lastError = null;
+        
             for (let url of urls) {
+        
                 if (id === 'gas') {
+        
                     const sep = url.includes('?') ? '&' : '?';
-                    url = `${url}${sep}province=${encodeURIComponent(currentOilRegion)}&region=${encodeURIComponent(currentOilRegion)}`;
+        
+                    url =
+                        `${url}${sep}province=${encodeURIComponent(currentOilRegion)}&region=${encodeURIComponent(currentOilRegion)}`;
                 }
+        
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 12000); 
+        
+                // 黄金接口必须更长超时
+                const timeout =
+                    id === 'gold'
+                        ? 15000
+                        : 10000;
+        
+                const timeoutId = setTimeout(
+                    () => controller.abort(),
+                    timeout
+                );
+        
                 try {
-                    const res = await fetch(url, { signal: controller.signal });
+        
+                    const res = await fetch(url, {
+                        signal: controller.signal
+                    });
+        
                     clearTimeout(timeoutId);
-                    if (res.ok) {
-                    const json = await res.json();
-                
-                    // 防止空数据
-                    if (
-                        json &&
-                        Object.keys(json).length > 0
-                    ) {
-                        return json;
+        
+                    if (!res.ok) {
+                        continue;
                     }
+        
+                    // 先获取文本
+                    const text = await res.text();
+        
+                    if (!text || text.length < 10) {
+                        continue;
+                    }
+        
+                    // 再解析 JSON
+                    let json;
+        
+                    try {
+                        json = JSON.parse(text);
+                    } catch {
+        
+                        // 防止返回 HTML
+                        continue;
+                    }
+        
+                    // 防止空对象
+                    if (
+                        !json ||
+                        typeof json !== 'object'
+                    ) {
+                        continue;
+                    }
+        
+                    // code 校验
+                    if (
+                        json.code &&
+                        json.code !== 200
+                    ) {
+                        continue;
+                    }
+        
+                    return json;
+        
+                } catch (e) {
+        
+                    clearTimeout(timeoutId);
+        
+                    lastError = e;
+        
+                    continue;
                 }
-                } catch (e) { clearTimeout(timeoutId); }
             }
-            throw new Error(`请求失败`);
+        
+            throw lastError || new Error('请求失败');
         }
 
         function extractCoreData(data) {
@@ -211,95 +272,81 @@
             return html + '</div>';
         }
 
-        // --- 3. 完美智能汇率引擎 (剔除日期，强制计算 1 CNY 等于多少外币) ---
-            function renderExchange(coreData) {
-
-            function findRate(code, aliases = []) {
-        
-                // 数组结构
-                if (Array.isArray(coreData)) {
-        
-                    for (const item of coreData) {
-        
-                        const str = JSON.stringify(item).toUpperCase();
-        
-                        if (
-                            str.includes(code) ||
-                            aliases.some(a => str.includes(a))
-                        ) {
-        
-                            // 自动寻找数字字段
-                            for (const key in item) {
-                                const val = parseFloat(item[key]);
-        
-                                if (!isNaN(val) && val > 0) {
-        
-                                    // 自动识别 100 外币基准
-                                    return val > 50
-                                        ? (100 / val).toFixed(4)
-                                        : (1 / val).toFixed(4);
-                                }
-                            }
-                        }
-                    }
+        // --- 3. 完美智能汇率引擎 ---
+                       function renderExchange(coreData) {
+            
+                // 核心：真正的汇率数组
+                const rates = coreData.rates || [];
+            
+                // 获取指定货币
+                function getRate(currencyCode) {
+            
+                    const item = rates.find(
+                        x => x.currency === currencyCode
+                    );
+            
+                    if (!item) return '-';
+            
+                    const val = parseFloat(item.rate);
+            
+                    if (isNaN(val)) return '-';
+            
+                    // 当前接口已经是：
+                    // 1 CNY = xxx 外币
+                    // 不需要再反转
+                    return val.toFixed(4);
                 }
-        
-                // 对象结构
-                if (typeof coreData === 'object') {
-        
-                    for (const key in coreData) {
-        
-                        const upperKey = key.toUpperCase();
-        
-                        if (
-                            upperKey.includes(code) ||
-                            aliases.some(a => upperKey.includes(a))
-                        ) {
-        
-                            const val = parseFloat(coreData[key]);
-        
-                            if (!isNaN(val) && val > 0) {
-        
-                                return val > 50
-                                    ? (100 / val).toFixed(4)
-                                    : (1 / val).toFixed(4);
-                            }
-                        }
-                    }
-                }
-        
-                return '-';
+            
+                const usd = getRate('USD');
+                const jpy = getRate('JPY');
+                const hkd = getRate('HKD');
+            
+                return `
+                    <div class="grid-2">
+            
+                        <div class="box-item !bg-red-50 !border-red-100">
+                            <div class="box-label !text-red-500">
+                                🇨🇳 人民币 (CNY)
+                            </div>
+            
+                            <div class="box-val !text-red-600">
+                                1.0000
+                            </div>
+                        </div>
+            
+                        <div class="box-item">
+                            <div class="box-label">
+                                🇺🇸 美元 (USD)
+                            </div>
+            
+                            <div class="box-val">
+                                ${usd}
+                            </div>
+                        </div>
+            
+                        <div class="box-item">
+                            <div class="box-label">
+                                🇯🇵 日元 (JPY)
+                            </div>
+            
+                            <div class="box-val">
+                                ${jpy}
+                            </div>
+                        </div>
+            
+                        <div class="box-item">
+                            <div class="box-label">
+                                🇭🇰 港币 (HKD)
+                            </div>
+            
+                            <div class="box-val">
+                                ${hkd}
+                            </div>
+                        </div>
+            
+                    </div>
+                `;
             }
-        
-            const usd = findRate('USD', ['美元']);
-            const jpy = findRate('JPY', ['日元']);
-            const hkd = findRate('HKD', ['港币']);
-        
-            return `
-                <div class="grid-2">
-                    <div class="box-item !bg-red-50 !border-red-100">
-                        <div class="box-label !text-red-500">🇨🇳 人民币 (CNY)</div>
-                        <div class="box-val !text-red-600">1.0000</div>
-                    </div>
-        
-                    <div class="box-item">
-                        <div class="box-label">🇺🇸 美元 (USD)</div>
-                        <div class="box-val">${usd}</div>
-                    </div>
-        
-                    <div class="box-item">
-                        <div class="box-label">🇯🇵 日元 (JPY)</div>
-                        <div class="box-val">${jpy}</div>
-                    </div>
-        
-                    <div class="box-item">
-                        <div class="box-label">🇭🇰 港币 (HKD)</div>
-                        <div class="box-val">${hkd}</div>
-                    </div>
-                </div>
-            `;
-        }
-
         // --- 4. 黄金排版引擎 ---
         function renderGold(coreData) {
                                const metals = Array.isArray(coreData)
