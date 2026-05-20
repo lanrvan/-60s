@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="每日热讯">
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/512/news.png">
     
-    <title>全网热点资讯</title>
+    <title>60s信息流</title>
     <style>
         :root {
             --bg-color: #f1f5f9;
@@ -60,8 +60,9 @@
         .rank-top1 { color: #ef4444; } .rank-top2 { color: #f97316; } .rank-top3 { color: #f59e0b; } .rank-normal { color: #94a3b8; }
         .bullet-dot { color: var(--primary); font-weight: bold; margin-right: 6px; font-size: 18px; line-height: 1; }
 
-        /* 特殊 UI 组件 (摸鱼、汇率、金价、历史等) */
+        /* 特殊 UI 组件 */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .box-item { background: #f8fafc; border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center; }
         .box-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
         .box-val { font-size: 15px; font-weight: 700; color: var(--text-main); }
@@ -101,44 +102,42 @@
             const newCity = prompt("请输入您想查询的省份或城市:", currentOilRegion);
             if (newCity && newCity.trim() !== "") {
                 currentOilRegion = newCity.trim();
-                triggerFetch(cardId, false, true); // true 代表强制重载
+                triggerFetch(cardId, false, true); 
             }
         };
 
-        // --- 核心配置 ---
+        // --- 核心配置（彻底修复并映射了所有接口的标准路由名） ---
         const configs = [
-            { id: 's60s', title: '每天60秒读懂世界', type: 'numbered-list', urls: ['https://60s.viki.moe/v2/60s', 'https://60s-api.viki.moe/v2/60s'] },
-            { id: 'ai', title: 'AI资讯快报', type: 'bullet-list', limit: 5, urls: ['https://60s.viki.moe/v2/ai-news', 'https://60s-api.viki.moe/v2/ai'] },
-            { id: 'epic', title: 'Epic Games游戏', type: 'game', urls: ['https://60s.viki.moe/v2/epic', 'https://60s-api.viki.moe/v2/epic'] },
-            { id: 'exchange', title: '当日货币汇率', type: 'exchange', urls: ['https://60s.viki.moe/v2/exchange-rate', 'https://60s-api.viki.moe/v2/exchange'] },
-            { id: 'gold', title: '黄金价格', type: 'gold', urls: ['https://60s.viki.moe/v2/gold-price', 'https://60s-api.viki.moe/v2/gold'] },
-            { id: 'gas', title: '汽油价格', type: 'oil', urls: ['https://60s.viki.moe/v2/fuel-price', 'https://60s-api.viki.moe/v2/oil'] },
+            { id: 's60s', title: '每天60秒读懂世界', type: 'numbered-list', urls: ['https://60s-api.viki.moe/v2/60s', 'https://60s.viki.moe/v2/60s'] },
+            { id: 'ai', title: 'AI资讯快报', type: 'bullet-list', limit: 5, urls: ['https://60s-api.viki.moe/v2/ai-news', 'https://60s.viki.moe/v2/ai-news'] },
+            { id: 'epic', title: 'Epic Games游戏', type: 'game', urls: ['https://60s-api.viki.moe/v2/epic', 'https://60s.viki.moe/v2/epic'] },
+            { id: 'exchange', title: '当日货币汇率', type: 'exchange', urls: ['https://60s-api.viki.moe/v2/exchange-rate', 'https://60s.viki.moe/v2/exchange-rate'] },
+            { id: 'gold', title: '黄金价格', type: 'gold', urls: ['https://60s-api.viki.moe/v2/gold-price', 'https://60s.viki.moe/v2/gold-price'] },
+            { id: 'gas', title: '汽油价格', type: 'oil', urls: ['https://60s-api.viki.moe/v2/fuel-price', 'https://60s.viki.moe/v2/fuel-price'] },
             
-            // 整合 IT 资讯并规范数量
+            // 热点资讯分组及精确排序
             { id: 'hot', title: '热点资讯', type: 'group', children: [
-                { id: 'tieba', title: '百度贴吧话题榜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/baidu/tieba'] },
-                { id: 'it', title: '实时IT资讯', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/it-news'] },
-                { id: 'douyin', title: '抖音热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/douyin'] },
-                { id: 'bilibili', title: '哔哩哔哩热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/bili'] },
-                { id: 'weibo', title: '微博热搜', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/weibo'] },
-                { id: 'xhs', title: '小红书热点', limit: 5, type: 'numbered-list', urls: ['https://60s.viki.moe/v2/rednote'] }
+                { id: 'tieba', title: '百度贴吧话题榜', limit: 5, type: 'numbered-list', urls: ['https://60s-api.viki.moe/v2/baidu/tieba'] },
+                { id: 'it', title: '实时IT资讯', limit: 5, type: 'numbered-list', urls: ['https://60s-api.viki.moe/v2/it-news', 'https://60s.viki.moe/v2/it-news'] },
+                { id: 'douyin', title: '抖音热搜', limit: 5, type: 'numbered-list', urls: ['https://60s-api.viki.moe/v2/douyin'] },
+                { id: 'bilibili', title: '哔哩哔哩热搜', limit: 5, type: 'numbered-list', urls: ['https://60s-api.viki.moe/v2/bili'] },
+                { id: 'weibo', title: '微博热搜', limit: 5, type: 'numbered-list', urls: ['https://60s-api.viki.moe/v2/weibo'] },
+                { id: 'xhs', title: '小红书热点', limit: 5, type: 'numbered-list', urls: ['https://60s-api.viki.moe/v2/rednote'] }
             ]},
             
-            { id: 'history', title: '历史上的今天', type: 'history', urls: ['https://60s.viki.moe/v2/today-in-history'] },
-            { id: 'moyu', title: '摸鱼日报', type: 'moyu', urls: ['https://60s.viki.moe/v2/moyu'] },
-            { id: 'word', title: '随机一言', type: 'quote', urls: ['https://60s.viki.moe/v2/hitokoto'] }
+            { id: 'history', title: '历史上的今天', type: 'history', urls: ['https://60s-api.viki.moe/v2/today-in-history'] },
+            { id: 'moyu', title: '摸鱼日报', type: 'moyu', urls: ['https://60s-api.viki.moe/v2/moyu'] },
+            { id: 'word', title: '随机一言', type: 'quote', urls: ['https://60s-api.viki.moe/v2/hitokoto'] }
         ];
 
         const globalDataCache = {}; 
 
         async function fetchWithFallbacks(urls, id) {
             for (let url of urls) {
-                // 动态拼接油价地区参数
                 if (id === 'gas') {
                     const sep = url.includes('?') ? '&' : '?';
                     url = `${url}${sep}province=${encodeURIComponent(currentOilRegion)}&region=${encodeURIComponent(currentOilRegion)}`;
                 }
-
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 6000); 
                 try {
@@ -180,7 +179,6 @@
             });
             html += '</div>';
 
-            // 专属处理 60s 的微语
             let weiyu = data.weiyu || coreData.weiyu || data.tip || '';
             if (config.id === 's60s' && weiyu) html += `<div class="weiyu"><strong>微语：</strong>${weiyu}</div>`;
             return html;
@@ -208,31 +206,41 @@
             return html + '</div>';
         }
 
-        // 3. 汇率渲染 (完全按需定制)
-        function renderExchange(coreData, data) {
-            let time = data.updated || data.time || data.update_time || '刚刚';
-            
-            // 精准抓取对应货币
-            const findCurrency = (keywords) => {
-                let target = Object.values(coreData).find(v => v.name && keywords.some(k => v.name.includes(k)));
-                if (!target) { // 尝试键名匹配
-                    const key = Object.keys(coreData).find(k => keywords.some(kw => k.toUpperCase().includes(kw)));
-                    target = coreData[key];
+        // 3. 汇率换算引擎 (智能剥离外币数据，转换为CNY比值)
+        function renderExchange(coreData) {
+            const getConvertedRate = (keywords) => {
+                let target = null;
+                // 在对象或数组中深层匹配货币名称
+                for(let k in coreData) {
+                    let val = coreData[k];
+                    if (keywords.some(kw => k.toUpperCase().includes(kw) || (val && val.name && val.name.includes(kw)))) {
+                        target = val.price || val.value || val.rate || val.hui_lv || val;
+                        break;
+                    }
+                }
+                if (!target && Array.isArray(coreData)) {
+                    let item = coreData.find(v => keywords.some(kw => JSON.stringify(v).includes(kw)));
+                    if (item) target = item.price || item.value || item.rate || item.hui_lv;
                 }
                 if (!target) return '-';
-                return target.price || target.value || target.rate || target;
+                
+                // 进行换算：无论 API 给的是 100美元=720元 还是 1美元=7.2元，这里统一处理为 1元=多少外币
+                let val = parseFloat(target);
+                if (isNaN(val) || val === 0) return '-';
+                let base = val > 50 ? 100 : 1; 
+                return (base / val).toFixed(4); // 计算 1 CNY 能兑换的外币金额
             };
 
-            const usd = findCurrency(['美元', 'USD']);
-            const jpy = findCurrency(['日元', 'JPY']);
-            const hkd = findCurrency(['港币', 'HKD']);
+            const usd = getConvertedRate(['USD', '美元']);
+            const jpy = getConvertedRate(['JPY', '日元']);
+            const hkd = getConvertedRate(['HKD', '港币']);
 
             return `
-                <div class="text-[12px] text-gray-500 mb-3 flex justify-between">
-                    <span>📅 ${time.split(' ')[0]}</span>
-                    <span>基准: 🇨🇳 人民币 (CNY)</span>
-                </div>
                 <div class="grid-2">
+                    <div class="box-item !bg-red-50 !border-red-100">
+                        <div class="box-label !text-red-500">🇨🇳 人民币 (CNY)</div>
+                        <div class="box-val !text-red-600">1.0000</div>
+                    </div>
                     <div class="box-item"><div class="box-label">🇺🇸 美元 (USD)</div><div class="box-val">${usd}</div></div>
                     <div class="box-item"><div class="box-label">🇯🇵 日元 (JPY)</div><div class="box-val">${jpy}</div></div>
                     <div class="box-item"><div class="box-label">🇭🇰 港币 (HKD)</div><div class="box-val">${hkd}</div></div>
@@ -240,29 +248,50 @@
             `;
         }
 
-        // 4. 黄金渲染
+        // 4. 黄金排版引擎
         function renderGold(coreData) {
-            let html = '';
-            // 基础金价
-            if (coreData.metals && Array.isArray(coreData.metals)) {
-                let basePrice = coreData.metals.find(m => m.name.includes('黄金'))?.today_price || coreData.metals[0].today_price;
-                html += `<div class="mb-4">
-                            <div class="text-[12px] text-gray-500 mb-2">💰 今日大盘基准</div>
-                            <div class="text-2xl font-bold text-yellow-600">${basePrice} <span class="text-[12px] text-gray-500 font-normal">元/克</span></div>
-                         </div>`;
-            }
-            // 品牌金价
-            if (coreData.stores && Array.isArray(coreData.stores)) {
-                html += `<div class="text-[12px] text-gray-500 mb-2">🏷️ 品牌金价 (部分)</div><div class="grid-2">`;
-                coreData.stores.slice(0, 6).forEach(s => {
-                    html += `<div class="box-item flex justify-between !text-left !px-3">
-                                <span class="text-[13px] text-gray-600">${s.brand}</span>
-                                <span class="font-bold text-[#f59e0b]">${s.price}</span>
-                             </div>`;
-                });
-                html += `</div>`;
-            }
-            return html || '<div class="loading-state">暂无黄金数据</div>';
+            const getMetal = (name) => {
+                let m = (coreData.metals || []).find(x => x.name && x.name.includes(name)) || {};
+                return { today: m.today_price || m.price || '-', sell: m.sell_price || m.retail_price || m.out_price || '-' };
+            };
+            const getStore = (brand) => {
+                let s = (coreData.stores || []).find(x => x.brand && x.brand.includes(brand)) || {};
+                return s.price || s.today_price || '-';
+            };
+
+            let gold = getMetal('黄金');
+            let silver = getMetal('白银');
+            let pt = getMetal('铂金');
+
+            return `
+                <div class="mb-4">
+                    <div class="text-[12px] text-gray-500 mb-2">📊 基础大盘价</div>
+                    <div class="grid-3 text-center mb-2">
+                        <div class="bg-yellow-50 p-2 rounded border border-yellow-100">
+                            <div class="text-[12px] text-yellow-600 font-bold mb-1">黄金</div>
+                            <div class="text-[11px] text-gray-500">今日: <span class="text-yellow-700 font-bold">${gold.today}</span></div>
+                            <div class="text-[11px] text-gray-500">卖出: <span class="text-yellow-700 font-bold">${gold.sell}</span></div>
+                        </div>
+                        <div class="bg-gray-50 p-2 rounded border border-gray-200">
+                            <div class="text-[12px] text-gray-600 font-bold mb-1">白银</div>
+                            <div class="text-[11px] text-gray-500">今日: <span class="text-gray-700 font-bold">${silver.today}</span></div>
+                            <div class="text-[11px] text-gray-500">卖出: <span class="text-gray-700 font-bold">${silver.sell}</span></div>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                            <div class="text-[12px] text-slate-600 font-bold mb-1">铂金</div>
+                            <div class="text-[11px] text-gray-500">今日: <span class="text-slate-700 font-bold">${pt.today}</span></div>
+                            <div class="text-[11px] text-gray-500">卖出: <span class="text-slate-700 font-bold">${pt.sell}</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-[12px] text-gray-500 mb-2">🏷️ 品牌金价 (部分)</div>
+                <div class="grid-2">
+                    <div class="box-item flex justify-between !text-left !px-3"><span class="text-[13px] text-gray-600">周大福</span><span class="font-bold text-[#f59e0b]">${getStore('周大福')}</span></div>
+                    <div class="box-item flex justify-between !text-left !px-3"><span class="text-[13px] text-gray-600">老凤祥</span><span class="font-bold text-[#f59e0b]">${getStore('老凤祥')}</span></div>
+                    <div class="box-item flex justify-between !text-left !px-3"><span class="text-[13px] text-gray-600">周生生</span><span class="font-bold text-[#f59e0b]">${getStore('周生生')}</span></div>
+                    <div class="box-item flex justify-between !text-left !px-3"><span class="text-[13px] text-gray-600">六福珠宝</span><span class="font-bold text-[#f59e0b]">${getStore('六福')}</span></div>
+                </div>
+            `;
         }
 
         // 5. 汽油渲染
@@ -315,12 +344,10 @@
 
         // 7. 摸鱼日报
         function renderMoyu(coreData) {
-            // 如果返回的是图片，兼容显示
             if (typeof coreData === 'string' || coreData.image) {
                 let img = coreData.image || coreData;
                 return `<img src="${img}" style="width:100%; border-radius:8px; display:block;">`;
             }
-            
             let progress = coreData.progress || {};
             let holiday = coreData.nextHoliday || { name: '假期', until: '-' };
             let quote = coreData.moyuQuote || '好好工作，努力摸鱼。';
@@ -356,10 +383,19 @@
             `;
         }
 
-        // 8. 随机一言
+        // 8. 随机一言 (彻底修复 [object Object] 的隐患)
         function renderQuote(coreData) {
-            let text = coreData.hitokoto || coreData.text || coreData.word || typeof coreData === 'string' ? coreData : '';
-            let author = coreData.from || '佚名';
+            let text = '';
+            let author = '佚名';
+            
+            // 安全解构，防止三元表达式短路导致的 Object 渲染
+            if (typeof coreData === 'string') {
+                text = coreData;
+            } else if (coreData) {
+                text = coreData.hitokoto || coreData.text || coreData.word || coreData.content || JSON.stringify(coreData);
+                author = coreData.from || coreData.author || '佚名';
+            }
+
             return `
                 <div class="text-center py-4 relative">
                     <span style="font-size:60px; color:#f3e8ff; position:absolute; top:-20px; left:0; font-family:serif; line-height:1; user-select:none;">"</span>
@@ -369,16 +405,22 @@
             `;
         }
         
-        // 9. 游戏 (Epic) 备用兼容
+        // 9. 游戏 (Epic) 渲染封面图
         function renderGame(coreData) {
             let list = Array.isArray(coreData) ? coreData : [];
             if(list.length === 0) return '<div class="loading-state">暂无数据</div>';
+            
             let html = '<div class="data-list">';
             list.forEach(item => {
-                html += `<a href="${item.link || '#'}" class="media-item border border-gray-100 rounded-lg p-2 hover:bg-gray-50">
-                            <div class="media-content">
+                let cover = item.cover || item.image || item.image_url || item.thumbnail || '';
+                html += `<a href="${item.link || '#'}" target="_blank" class="block border border-gray-100 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                            ${cover ? `<div class="w-full h-36 bg-gray-100"><img src="${cover}" class="w-full h-full object-cover"></div>` : ''}
+                            <div class="p-3">
                                 <div class="font-bold text-[14px] text-gray-800">${item.title || item.name}</div>
-                                <div class="text-[12px] text-gray-500 mt-1">🆓 免费截止: ${item.free_end || item.end_date || '未知'}</div>
+                                <div class="text-[12px] text-gray-500 mt-1 flex justify-between">
+                                    <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">免费</span>
+                                    <span>截止: ${item.free_end || item.end_date || '未知'}</span>
+                                </div>
                             </div>
                          </a>`;
             });
@@ -393,7 +435,7 @@
             switch(config.type) {
                 case 'numbered-list': return renderNumberedList(coreData, config, data, isDetailMode);
                 case 'bullet-list': return renderBulletList(coreData, config);
-                case 'exchange': return renderExchange(coreData, data);
+                case 'exchange': return renderExchange(coreData);
                 case 'gold': return renderGold(coreData);
                 case 'oil': return renderOil(coreData, data);
                 case 'history': return renderHistory(coreData, data);
