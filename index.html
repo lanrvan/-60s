@@ -130,6 +130,8 @@
 
         const globalDataCache = {}; 
 
+        const requestTracker = {};
+
               async function fetchWithFallbacks(urls, id) {
         
             let lastError = null;
@@ -587,22 +589,82 @@
             mainPage.innerHTML = html;
         }
 
-        async function triggerFetch(targetId, isChild = false, forceRefresh = false) {
-            let conf = isChild 
-                ? configs.find(c => c.type === 'group').children.find(c => c.id === targetId)
-                : configs.find(c => c.id === targetId);
-
-            const container = document.getElementById(`content-${conf.id}`);
-            container.innerHTML = `<div class="loading-state"><div class="spinner"></div></div>`;
-
-            try {
-                const data = await fetchWithFallbacks(conf.urls, conf.id);
-                globalDataCache[conf.id] = data; 
-                container.innerHTML = generateHTML(data, conf, false);
-            } catch (error) {
-                container.innerHTML = `<div class="loading-state" style="color:var(--danger)">❌ 接口请求失败</div>`;
+         async function triggerFetch(targetId, isChild = false) {
+            
+                let conf = isChild
+                    ? configs.find(c => c.type === 'group')
+                        .children.find(c => c.id === targetId)
+                    : configs.find(c => c.id === targetId);
+            
+                if (!conf) return;
+            
+                const container =
+                    document.getElementById(`content-${conf.id}`);
+            
+                if (!container) return;
+            
+                // 当前请求ID
+                const requestId = Date.now() + Math.random();
+            
+                // 记录最新请求
+                requestTracker[conf.id] = requestId;
+            
+                container.innerHTML = `
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <br>
+                        数据抓取中...
+                    </div>
+                `;
+            
+                try {
+            
+                    const data =
+                        await fetchWithFallbacks(
+                            conf.urls,
+                            conf.id
+                        );
+            
+                    // 如果不是最新请求
+                    // 直接丢弃
+                    if (
+                        requestTracker[conf.id] !== requestId
+                    ) {
+                        return;
+                    }
+            
+                    globalDataCache[conf.id] = data;
+            
+                    container.innerHTML =
+                        generateHTML(
+                            data,
+                            conf,
+                            false
+                        );
+            
+                } catch (error) {
+            
+                    // 防止旧请求覆盖
+                    if (
+                        requestTracker[conf.id] !== requestId
+                    ) {
+                        return;
+                    }
+            
+                    console.error(
+                        '[接口失败]',
+                        conf.id,
+                        error
+                    );
+            
+                    container.innerHTML = `
+                        <div class="loading-state"
+                             style="color:var(--danger)">
+                             ❌ 接口请求失败
+                        </div>
+                    `;
+                }
             }
-        }
 
         function toggleDetail(show) {
             const mainPage = document.getElementById('main-page');
